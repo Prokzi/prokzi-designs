@@ -658,6 +658,15 @@ function buildDriver(cx,cy,cz,rx,r){
   mesh(vg,MAT.sring,cx,cy,cz,srx);
 }
 
+// Interior height available for a front-mounted slot port's baffle walls —
+// bounded by both the top and bottom panels (H-2T), or H-3T when the
+// mounting face carries a doubled baffle layer (extra panel eats into it).
+function slotWallHeight(){
+  const {H,T,mount,doubleBaffle}=S;
+  return (mount==='top' && doubleBaffle) ? H-3*T : H-2*T;
+}
+window.slotWallHeight = slotWallHeight;
+
 function buildPorts(W,H,D,T){
   const {Aon,Bon,layout}=S;
 
@@ -678,12 +687,12 @@ function buildPorts(W,H,D,T){
 
   } else if(layout==='dual'){
     // Single Slot — labyrinth port
-    const sh=H-T, sw=S.S1W, sl=S.S1L, WT=T;
+    const sh=slotWallHeight(), sw=S.S1W, sl=S.S1L, WT=T;
     if(Aon) buildFrontSlot('A', W, H, D, T, sw, sh, sl, WT);
 
   } else if(layout==='dualboth'){
     // Dual Slot — mirrored walls, A=left B=right
-    const sh=H-T, sw=S.S1W, sl=S.S1L, WT=T;
+    const sh=slotWallHeight(), sw=S.S1W, sl=S.S1L, WT=T;
     if(Aon) buildDualSlot('A', W, H, D, T, sw, sh, sl, WT);
     if(Bon) buildDualSlot('B', W, H, D, T, sw, sh, sl, WT);
 
@@ -818,7 +827,7 @@ function spawnBottomSlot(wx, wy, wz, W, H, D, T){
   const sw   = S.S1W; // opening height
   const sl   = S.S1L;
   const WT   = T;
-  slotPort(wx, wy, wz, 'bottom-wall', sw, H-T, sl, mat, eMat);
+  slotPort(wx, wy, wz, 'bottom-wall', sw, slotWallHeight(), sl, mat, eMat);
 }
 
 function aeroPort(wx,wy,wz,face,dia,len,mat){
@@ -991,7 +1000,7 @@ function portData(){
   const isAero   = layout==='aero'||layout==='aerotop'||layout==='aeroside';
   const hasBoth  = isAero||(layout==='dualboth');
   const bOK      = Bon && hasBoth;
-  const slotH    = S.H-S.T;
+  const slotH    = slotWallHeight();
   let a1=0,l1=0,a2=0,l2=0;
   if(Aon){
     if(isAero)            { a1=Math.PI*(S.P1D/2)**2; l1=S.P1L; }
@@ -1043,7 +1052,7 @@ function go(){
   st('lD',S.D.toFixed(1)+'"');st('lT',S.T.toFixed(2)+'"');
   st('lP1D',S.P1D.toFixed(2)+'"');st('lP1L',S.P1L.toFixed(1)+'"');
   st('lP2D',S.P2D.toFixed(2)+'"');st('lP2L',S.P2L.toFixed(1)+'"');
-  const slotH=H-T;
+  const slotH=slotWallHeight();
   const interiorW=W-2*T;
   st('lS1W',S.S1W.toFixed(2)+'"');
   if(layout==='back'){    const bswEl=document.getElementById('rS1BW');
@@ -1100,7 +1109,7 @@ function go(){
   st('hMount',mount.charAt(0).toUpperCase()+mount.slice(1));
 
   const isAeroL = layout==='aero'||layout==='aerotop'||layout==='aeroside';
-  const slotHud = H-T;
+  const slotHud = slotWallHeight();
   const pAd = isAeroL ? `Ø${S.P1D}" L${S.P1L}"` : `${S.S1W}"×${slotHud.toFixed(1)}" L${S.S1L}"`;
   const pBd = isAeroL ? `Ø${S.P2D}" L${S.P2L}"` : pAd;
   st('hudBox',`${W}"×${H}"×${D}"`);
@@ -1290,7 +1299,7 @@ function buildCutSheet(){
   // ── SLOT PORT WALLS ───────────────────────────────────────────────────────
   const portPieces = [];
   if(ptype === 'slot'){
-    const slotH = H - T;
+    const slotH = slotWallHeight();
     const sw = S.S1W;
     const sl = S.S1L;
     const WT = T;
