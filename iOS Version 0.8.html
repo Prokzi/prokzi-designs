@@ -1,0 +1,2742 @@
+<!DOCTYPE html>
+<!--
+===============================================================================
+  PROKZI DESIGNS — ENCLOSURE CREATOR
+  Copyright (c) 2026 Prokzi Designs. All rights reserved.
+
+  This software, its source code, user interface, layout, calculations,
+  subwoofer parameter database and generated cut sheets are the exclusive
+  property of Prokzi Designs and are protected by copyright law.
+
+  You MAY: use this tool to design enclosures, including for paid work, and
+  build, sell or share the physical enclosures you design with it.
+
+  You MAY NOT: copy, redistribute, host, resell, sublicense, rebrand or create
+  derivative works from this software or its source code, in whole or in part,
+  without prior written permission from Prokzi Designs.
+
+  Removing or altering this notice does not affect ownership.
+
+  NO WARRANTY. Provided "as is" — see the in-app Legal notice for the full
+  terms, disclaimer and third-party attributions.
+
+  Unauthorized use: contact via the app's support links.
+===============================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="Prokzi Designs">
+<meta name="copyright" content="Copyright (c) 2026 Prokzi Designs. All rights reserved.">
+<meta name="description" content="Prokzi Designs Enclosure Creator — subwoofer enclosure design, port tuning, response simulation and cut sheets.">
+<meta name="application-name" content="Prokzi Designs Enclosure Creator">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0c0f">
+<title>Prokzi Designs — Enclosure Creator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0b0c0f;--surf:#13151a;--panel:#1a1d25;--bord:#252830;
+  --acc:#f97316;--txt:#e8eaf0;--sub:#8890a0;--muted:#4b5060;
+  --good:#22c55e;--warn:#eab308;--bad:#ef4444;
+  --c1:#38bdf8;--c2:#a78bfa;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:'Space Grotesk',sans-serif;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+button{font-family:inherit;touch-action:manipulation;cursor:pointer;-webkit-user-select:none;user-select:none}
+
+/* ── APP SHELL — vertical phone layout ── */
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;width:100%}
+@media(min-width:700px){#app{max-width:520px;margin:0 auto;border-left:1px solid var(--bord);border-right:1px solid var(--bord)}}
+
+/* ── HEADER ── */
+#shead{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surf);border-bottom:1px solid var(--bord);padding:8px 14px;padding-top:max(8px, env(safe-area-inset-top))}
+.logo-name{font-size:15px;font-weight:700;letter-spacing:-.3px;color:#fff;white-space:nowrap}
+.srow{display:flex;flex:1;max-width:250px;margin-left:auto}
+.sstat{flex:1;padding:3px 8px;background:var(--panel);border:1px solid var(--bord)}
+.sstat:first-child{border-radius:7px 0 0 7px}.sstat:last-child{border-radius:0 7px 7px 0}
+.sstat+.sstat{border-left:none}
+.ssl{font-size:8px;color:var(--sub);text-transform:uppercase;letter-spacing:.6px}
+.ssv{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--acc);line-height:1.3;white-space:nowrap}
+
+/* ── 3D VIEWPORT ── */
+#canvasWrap{position:relative;flex-shrink:0;height:38dvh;min-height:225px;background:var(--bg);border-bottom:1px solid var(--bord)}
+#c3d{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#hud{position:absolute;top:8px;left:8px;right:8px;display:flex;flex-wrap:wrap;gap:4px;pointer-events:none;z-index:2}
+.hpill{background:rgba(11,12,15,.85);border:1px solid var(--bord);border-radius:20px;padding:3px 9px;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--sub);display:flex;align-items:center;gap:5px}
+.hpill b{color:var(--txt);font-weight:500}
+.hdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+#vcam{position:absolute;bottom:8px;left:8px;right:8px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;z-index:2;padding:2px}
+#vcam::-webkit-scrollbar{display:none}
+.vbtn{flex-shrink:0;background:rgba(19,21,26,.94);border:1px solid var(--bord);border-radius:16px;padding:7px 13px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--sub);transition:all .15s}
+.vbtn.on{border-color:var(--acc);color:var(--acc)}
+#ghint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--sub);background:rgba(11,12,15,.75);padding:6px 14px;border-radius:16px;pointer-events:none;z-index:2;animation:gh .8s 3.2s forwards;white-space:nowrap}
+@keyframes gh{to{opacity:0;visibility:hidden}}
+
+/* ── SCROLLING CONTENT ── */
+#scontent{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:14px 14px 24px;background:var(--panel)}
+#scontent::-webkit-scrollbar{width:0}
+.pane{display:none;flex-direction:column;gap:12px}
+.pane.on{display:flex}
+.sec{font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--bord);margin-top:4px}
+
+/* ── SLIDERS — big thumbs + stepper buttons ── */
+.sl{display:flex;flex-direction:column;gap:7px}
+.slr{display:flex;justify-content:space-between;align-items:center}
+.sln{font-size:13px;color:var(--sub)}
+.slv{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--txt);background:var(--bg);border:1px solid var(--bord);border-radius:7px;padding:4px 9px;min-width:66px;text-align:right}
+.slwrap{display:flex;align-items:center;gap:11px}
+.stepb{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:1px solid var(--bord);background:var(--bg);color:var(--sub);font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .1s}
+.stepb:active{border-color:var(--acc);color:var(--acc);transform:scale(.92)}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;width:100%;min-width:0;height:6px;background:var(--bord);border-radius:3px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--acc);border:3px solid var(--bg);box-shadow:0 0 0 1.5px var(--acc),0 2px 6px rgba(0,0,0,.5)}
+.r1::-webkit-slider-thumb{background:var(--c1);box-shadow:0 0 0 1.5px var(--c1),0 2px 6px rgba(0,0,0,.5)}
+.r2::-webkit-slider-thumb{background:var(--c2);box-shadow:0 0 0 1.5px var(--c2),0 2px 6px rgba(0,0,0,.5)}
+
+/* ── TOGGLE ROWS ── */
+.trow{display:flex;gap:4px;background:var(--bg);border-radius:10px;padding:4px}
+.tbtn{flex:1;font-size:12px;font-weight:600;min-height:42px;padding:5px 2px;border-radius:7px;border:none;background:none;color:var(--muted);transition:all .15s;text-align:center;white-space:nowrap}
+.tbtn.on{background:var(--acc);color:#000}
+
+/* ── METRICS ── */
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mc{background:var(--bg);border:1px solid var(--bord);border-radius:9px;padding:9px 11px}
+.mc.full{grid-column:1/-1}
+.ml{font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.mv{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;line-height:1.1}
+.mu{font-size:9px;color:var(--sub);margin-left:2px}
+.mn{font-size:8px;color:var(--muted);margin-top:3px;line-height:1.3;letter-spacing:.2px}
+.scap{font-size:9px;color:var(--muted);line-height:1.4;padding:1px 2px 5px}
+.dcard{background:var(--bg);border:1px solid var(--bord);border-radius:8px;padding:11px 12px;margin-top:10px}
+.dtitle{font-size:12px;font-weight:700;color:var(--txt);margin-bottom:3px}
+.dtext{font-size:9px;color:var(--muted);line-height:1.45;margin-bottom:9px}
+.dbtns{display:flex;flex-direction:column;gap:6px}
+.dbtn{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 10px;border-radius:6px;
+  font-size:13px;font-weight:700;text-decoration:none;color:#fff;transition:filter .15s,transform .1s;
+  font-family:'Space Grotesk',sans-serif;-webkit-tap-highlight-color:transparent}
+.dbtn:active{transform:translateY(1px);filter:brightness(1.12)}
+.dbtn .dmark{font-size:14px;font-weight:800;opacity:.95}
+.d-cashapp{background:#00d54b;color:#00320f}
+.d-venmo{background:#008cff}
+.d-paypal{background:#0070ba}
+@media print{.noprint{display:none!important}}
+
+/* ── LEGAL ── */
+.copyline{font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.legalbtn{background:none;border:1px solid var(--bord);border-radius:4px;color:var(--sub);
+  font-size:10px;padding:5px 12px;cursor:pointer;font-family:'Space Grotesk',sans-serif;
+  font-weight:600;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.legalbtn:active{border-color:var(--acc);color:var(--acc)}
+#sfootIn{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:12px 2px 4px;margin-top:10px;border-top:1px solid var(--bord)}
+#legalOverlay{position:fixed;inset:0;background:rgba(6,7,10,.9);z-index:80;display:none;
+  align-items:flex-end;justify-content:center}
+#legalOverlay.on{display:flex}
+#legalBox{background:var(--panel);border:1px solid var(--bord);border-radius:14px 14px 0 0;
+  width:100%;max-height:92vh;display:flex;flex-direction:column}
+#legalHead{flex-shrink:0;padding:13px 16px;border-bottom:1px solid var(--bord);
+  display:flex;justify-content:space-between;align-items:center}
+#legalHead .lt{font-size:14px;font-weight:700;color:var(--txt)}
+#legalBody{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 28px;
+  font-size:12px;line-height:1.62;color:var(--sub)}
+#legalBody h4{font-size:10px;color:var(--acc);text-transform:uppercase;letter-spacing:.9px;margin:16px 0 5px}
+#legalBody h4:first-child{margin-top:0}
+#legalBody p{margin-bottom:8px}
+#legalBody ul{margin:0 0 8px 16px}
+#legalBody li{margin-bottom:4px}
+#legalBody b{color:var(--txt);font-weight:600}
+.lclose{background:none;border:1px solid var(--bord);border-radius:6px;color:var(--sub);
+  font-size:12px;padding:6px 14px;cursor:pointer;font-weight:600;
+  font-family:'Space Grotesk',sans-serif;-webkit-tap-highlight-color:transparent}
+.lclose:active{border-color:var(--acc);color:var(--acc)}
+#printMark{display:none}
+@media print{
+  #printMark{display:block;position:fixed;bottom:0;left:0;right:0;text-align:center;
+    font-size:9px;color:#444;padding:4px 0}
+}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+
+/* ── PORT CARDS ── */
+.pc{background:var(--bg);border:1px solid var(--bord);border-radius:11px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.pch{display:flex;align-items:center;justify-content:space-between}
+.pct{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.pdot{width:9px;height:9px;border-radius:50%}
+.pdot.d1{background:var(--c1);box-shadow:0 0 6px var(--c1)}
+.pdot.d2{background:var(--c2);box-shadow:0 0 6px var(--c2)}
+.etog{font-size:12px;padding:7px 14px;border-radius:7px;border:1px solid var(--bord);background:var(--surf);color:var(--muted);font-family:'JetBrains Mono',monospace;transition:all .15s;min-height:36px}
+.etog.on{border-color:var(--good);color:var(--good)}
+.pbody{display:flex;flex-direction:column;gap:9px}
+.pbody.off{opacity:.3;pointer-events:none}
+
+/* ── T/S NUMBER INPUTS ── */
+.ctrl{display:flex;flex-direction:column;gap:5px}
+.ctrl-row{display:flex;justify-content:space-between;align-items:center}
+
+/* ── TUNING BAR ── */
+.tbw{background:var(--bg);border:1px solid var(--bord);border-radius:9px;padding:10px 12px}
+.tbh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tbar{height:6px;background:var(--bord);border-radius:3px;position:relative}
+.tbfill{position:absolute;inset:0;border-radius:3px;background:linear-gradient(90deg,var(--bad) 0%,var(--warn) 22%,var(--good) 40%,var(--good) 60%,var(--warn) 80%,var(--bad) 100%)}
+.tbn{position:absolute;top:-6px;width:3px;height:18px;background:#fff;border-radius:2px;transform:translateX(-50%);transition:left .2s;box-shadow:0 0 6px rgba(255,255,255,.5)}
+.tblabels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:5px}
+
+/* ── FREQ CANVAS ── */
+.fw{background:var(--bg);border:1px solid var(--bord);border-radius:9px;overflow:hidden}
+
+/* ── CUT SHEET ── */
+.cut-piece{background:var(--bg);border:1px solid var(--bord);border-radius:9px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.cut-name{font-size:12px;font-weight:600;color:var(--txt)}
+.cut-sub{font-size:9px;color:var(--muted);margin-top:2px}
+.cut-right{text-align:right;flex-shrink:0}
+.cut-dim{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--acc);white-space:nowrap}
+.cut-qty{font-size:9px;color:var(--sub);margin-top:2px}
+
+/* ── BOTTOM TAB BAR ── */
+#stabbar{flex-shrink:0;display:flex;background:var(--surf);border-top:1px solid var(--bord);padding:6px 8px;padding-bottom:max(8px, env(safe-area-inset-bottom))}
+.stab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:50px;padding:5px 0 3px;border:none;background:none;color:var(--muted);font-size:10px;font-weight:600;border-radius:11px;transition:color .15s}
+.stab svg{width:22px;height:22px}
+.stab.on{color:var(--acc)}
+
+/* ── PRINT — cut sheet only ── */
+@media print{
+  #shead,#canvasWrap,#stabbar{display:none!important}
+  html,body,#app,#scontent,.mc,.cut-piece,.pc{background:#fff!important;color:#000!important;border-color:#999!important}
+  #app{height:auto}#scontent{overflow:visible}
+  .cut-name,.mv{color:#000!important}.cut-dim,.ssv{color:#b34700!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="shead">
+    <div class="logo-name">Prokzi <em style="font-style:normal;font-weight:300">Designs</em></div>
+    <div class="srow">
+      <div class="sstat"><div class="ssl">Fb</div><div class="ssv" id="hFb">—</div></div>
+      <div class="sstat"><div class="ssl">Net Vol</div><div class="ssv" id="hVol">—</div></div>
+      <div class="sstat"><div class="ssl">Mount</div><div class="ssv" id="hMount" style="font-size:10px">—</div></div>
+    </div>
+  </div>
+
+  <!-- 3D VIEWPORT -->
+  <div id="canvasWrap">
+    <canvas id="c3d"></canvas>
+    <div id="hud">
+      <div class="hpill"><div class="hdot" style="background:var(--acc)"></div><b id="hudBox">—</b></div>
+      <div class="hpill"><div class="hdot" style="background:var(--c1)"></div><b id="hudPA">—</b></div>
+      <div class="hpill"><div class="hdot" style="background:var(--c2)"></div><b id="hudPB">—</b></div>
+    </div>
+    <div id="ghint">Drag to orbit · Pinch to zoom</div>
+    <div id="vcam">
+      <button class="vbtn on" id="bPersp" onclick="setView('persp')">3D</button>
+      <button class="vbtn" id="bFront"  onclick="setView('front')">Front</button>
+      <button class="vbtn" id="bBack"   onclick="setView('back')">Back</button>
+      <button class="vbtn" id="bTop"    onclick="setView('top')">Top</button>
+      <button class="vbtn" id="bSide"   onclick="setView('side')">Side</button>
+      <button class="vbtn" onclick="resetCam()">&#10227;</button>
+    </div>
+  </div>
+
+  <div id="scontent">
+
+    <!-- SIZE -->
+    <div class="pane" id="tab-box">
+      <div class="sec">Enclosure (inches)</div>
+      <div class="sl"><div class="slr"><span class="sln">Width</span><span class="slv" id="lW">24.0"</span></div><input type="range" min="8" max="72" step="0.5" value="24" oninput="S.W=+this.value;go()"></div>
+      <div class="sl"><div class="slr"><span class="sln">Height</span><span class="slv" id="lH">16.0"</span></div><input type="range" min="6" max="48" step="0.5" value="16" oninput="S.H=+this.value;go()"></div>
+      <div class="sl"><div class="slr"><span class="sln">Depth</span><span class="slv" id="lD">18.0"</span></div><input type="range" min="6" max="60" step="0.5" value="18" oninput="S.D=+this.value;go()"></div>
+      <div class="sl"><div class="slr"><span class="sln">Wood Thickness</span><span class="slv" id="lT">0.75"</span></div><input type="range" min="0.5" max="1.5" step="0.25" value="0.75" oninput="S.T=+this.value;go()"></div>
+      <div class="sec">Volume</div>
+      <div class="mg">
+        <div class="mc"><div class="ml">Net Volume</div><div class="mv" id="mVol">—<span class="mu">ft³</span></div></div>
+        <div class="mc"><div class="ml">Gross Vol</div><div class="mv" id="mGross">—<span class="mu">ft³</span></div></div>
+        <div class="mc full"><div class="ml">Tuning Frequency (Fb)</div><div class="mv" id="mFb">—<span class="mu">Hz</span></div></div>
+      </div>
+      <div class="sec">Port Air Velocity</div>
+      <div class="mg">
+        <div class="mc"><div class="ml">Port A</div><div class="mv" id="mV1">—</div></div>
+        <div class="mc"><div class="ml">Port B</div><div class="mv" id="mV2">—</div></div>
+      </div>
+    </div>
+
+    <!-- TYPE -->
+    <div class="pane on" id="tab-bp">
+      <div class="sec">Enclosure Type</div>
+      <div class="trow">
+        <button class="tbtn on" id="enc-sealed" onclick="setEncl('sealed')">Sealed</button>
+        <button class="tbtn"    id="enc-std"    onclick="setEncl('std')">Ported</button>
+        <button class="tbtn"    id="enc-bp4"    onclick="setEncl('bp4')">4th Order</button>
+      </div>
+      <div class="scap" id="encDesc" style="padding-top:7px"></div>
+
+      <!-- Sealed readouts -->
+      <div id="sealedBody" style="display:none">
+        <div class="sec">Sealed Response</div>
+        <div class="mg">
+          <div class="mc"><div class="ml">Fc — System Resonance</div><div class="mv" id="mScFc">—<span class="mu">Hz</span></div>
+            <div class="mn">Where a sealed box starts rolling off</div></div>
+          <div class="mc"><div class="ml">Qtc — Damping</div><div class="mv" id="mScQ">—</div>
+            <div class="mn" id="mScQn">0.707 is maximally flat</div></div>
+        </div>
+        <div class="mn" style="margin-top:7px">Ports are disabled — a sealed box has none. Set the box size on
+        the Size tab and the driver on the Sub tab.</div>
+      </div>
+
+      <div id="bpBody" style="display:none">
+        <div class="sec">Chambers</div>
+        <div class="sl"><div class="slr"><span class="sln">Rear Chamber Depth</span><span class="slv" id="lbpDiv">9.0"</span></div>
+          <input class="r1" id="rbpDiv" type="range" min="1" max="40" step="0.25" value="9" oninput="S.bpDiv=+this.value;go()"></div>
+        <div class="mn" style="margin-top:4px">Clear depth behind the sub baffle, measured from the inside face of the back panel.</div>
+        <div class="mg" style="margin-top:8px">
+          <div class="mc"><div class="ml">Rear Chamber</div><div class="mv" id="mbpV1">—<span class="mu">ft³</span></div>
+            <div class="mn">Sealed — behind the cone</div></div>
+          <div class="mc"><div class="ml">Front Chamber</div><div class="mv" id="mbpV2">—<span class="mu">ft³</span></div>
+            <div class="mn">Ported — fires out the front</div></div>
+          <div class="mc full"><div class="ml">Sub Baffle</div><div class="mv" id="mbpBaf">—<span class="mu">in</span></div>
+            <div class="mn">Double layer — always 2 sheets laminated, drivers mount here</div></div>
+        </div>
+
+        <div class="sec">Port Tuning</div>
+        <div class="mg">
+          <div class="mc"><div class="ml">Front Chamber Fb</div><div class="mv" id="mbpFb">—<span class="mu">Hz</span></div>
+            <div class="mn">Set the port type and size on the Ports tab</div></div>
+          <div class="mc"><div class="ml">Port Area</div><div class="mv" id="mbpArea">—<span class="mu">in²</span></div>
+            <div class="mn">Total across both ports</div></div>
+        </div>
+        <div id="bpWarn" style="display:none;font-size:9px;line-height:1.4;color:var(--bad);padding:7px 2px 0"></div>
+      </div>
+    </div>
+
+    <!-- PORTS -->
+    <div class="pane" id="tab-ports">
+      <div id="sealedPortNote" style="display:none;padding:16px 2px;text-align:center">
+        <div style="font-size:14px;font-weight:700;color:var(--txt);margin-bottom:6px">Sealed enclosure — no ports</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">A sealed box is airtight, so there's nothing to
+        tune here. Switch to <b style="color:var(--sub)">Ported</b> or <b style="color:var(--sub)">4th Order</b> on the
+        Type tab to enable port controls.</div>
+      </div>
+      <div id="portControls">
+      <div id="bpPortNote" class="scap" style="display:none;padding-bottom:8px">
+        <b style="color:var(--acc)">4th Order active</b> — this port vents the <b>front chamber</b> out the front face.
+      </div>
+      <div id="layoutSection">
+        <div class="sec">Port Type</div>
+        <div class="trow">
+          <button class="tbtn"    id="pt-aero" onclick="setPortGroup('aero')">Aero Port</button>
+          <button class="tbtn on" id="pt-slot" onclick="setPortGroup('slot')">Slot Port</button>
+        </div>
+
+        <!-- Aero sub-options -->
+        <div id="aeroOpts" style="display:none">
+          <div style="font-size:9px;color:var(--muted);margin:6px 0 4px;text-transform:uppercase;letter-spacing:.8px">Location</div>
+          <div class="trow">
+            <button class="tbtn on" id="lay-aero"  onclick="setLayout('aero')">Front</button>
+            <button class="tbtn"    id="lay-aerotop"  onclick="setLayout('aerotop')">Top</button>
+            <button class="tbtn"    id="lay-aeroside" onclick="setLayout('aeroside')">Side</button>
+          </div>
+        </div>
+
+        <!-- Slot sub-options -->
+        <div id="slotOpts">
+          <div style="font-size:9px;color:var(--muted);margin:6px 0 4px;text-transform:uppercase;letter-spacing:.8px">Configuration</div>
+          <div class="trow">
+            <button class="tbtn on" id="lay-dual"   onclick="setSlotConfig('standard')">Standard</button>
+            <button class="tbtn"    id="lay-center" onclick="setSlotConfig('center')">Center</button>
+            <button class="tbtn"    id="lay-back"   onclick="setSlotConfig('bottom')">Bottom</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PORT A -->
+      <div class="pc">
+        <div class="pch">
+          <div class="pct"><div class="pdot d1"></div><span id="pAn">Aero Port A</span></div>
+          <button class="etog on" id="etA" onclick="togPort('A')">ON</button>
+        </div>
+        <div class="pbody" id="pbA">
+          <div id="aeroA" style="display:none">
+            <div class="sl"><div class="slr"><span class="sln">Diameter</span><span class="slv" id="lP1D">4.0"</span></div><input class="r1" type="range" min="1" max="12" step="0.25" value="4" oninput="S.P1D=+this.value;go()"></div>
+            <div class="sl" style="margin-top:5px"><div class="slr"><span class="sln">Length</span><span class="slv" id="lP1L">12.0"</span></div><input class="r1" type="range" min="1" max="72" step="0.5" value="12" oninput="S.P1L=+this.value;go()"></div>
+            <div id="posA" style="margin-top:6px">
+              <div style="font-size:9px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.8px">Position on face</div>
+              <div class="sl"><div class="slr"><span class="sln">H offset</span><span class="slv" id="lP1X">center</span></div><input class="r1" type="range" min="-30" max="30" step="0.5" value="3" oninput="S.P1ox=+this.value;go()"></div>
+              <div class="sl" style="margin-top:5px"><div class="slr"><span class="sln">V offset</span><span class="slv" id="lP1Y">center</span></div><input class="r1" type="range" min="-20" max="20" step="0.5" value="1" oninput="S.P1oy=+this.value;go()"></div>
+            </div>
+          </div>
+          <div id="slotA">
+            <div class="sl"><div class="slr"><span class="sln" id="lS1Wlabel">Opening Width</span><span class="slv" id="lS1W">2.0"</span></div><input class="r1" type="range" min="0.5" max="24" step="0.25" value="2" oninput="S.S1W=+this.value;go()"></div>
+            <div id="bswRow" style="display:none" class="sl" style="margin-top:5px"><div class="slr"><span class="sln">Port Width</span><span class="slv" id="lS1BW">Full</span></div><input class="r1" id="rS1BW" type="range" min="2" max="72" step="0.25" value="22" oninput="S.S1BW=+this.value;go()"></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center"><span class="sln" id="lS1Hlabel" style="color:var(--muted)">Height</span><span class="slv" id="lS1H" style="color:var(--good);font-size:10px">—</span></div>
+            <div class="sl" style="margin-top:5px"><div class="slr"><span class="sln">Length</span><span class="slv" id="lS1L">14.0"</span></div><input class="r1" type="range" min="2" max="72" step="0.5" value="14" oninput="S.S1L=+this.value;go()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PORT B -->
+      <div class="pc" id="pcB">
+        <div class="pch">
+          <div class="pct"><div class="pdot d2"></div><span id="pBn">Aero Port B</span></div>
+          <button class="etog on" id="etB" onclick="togPort('B')">ON</button>
+        </div>
+        <div id="slotBnote" style="display:none;font-size:10px;color:var(--muted);padding:2px 0">Mirrors Port A settings</div>
+        <div class="pbody" id="pbB">
+          <div id="aeroB">
+            <div class="sl"><div class="slr"><span class="sln">Diameter</span><span class="slv" id="lP2D">4.0"</span></div><input class="r2" type="range" min="1" max="12" step="0.25" value="4" oninput="S.P2D=+this.value;go()"></div>
+            <div class="sl" style="margin-top:5px"><div class="slr"><span class="sln">Length</span><span class="slv" id="lP2L">12.0"</span></div><input class="r2" type="range" min="1" max="72" step="0.5" value="12" oninput="S.P2L=+this.value;go()"></div>
+          </div>
+          <div id="slotB" style="display:none">
+            <div class="sl"><div class="slr"><span class="sln">Opening Width</span><span class="slv" id="lS2W">2.0"</span></div><input class="r2" type="range" min="0.5" max="24" step="0.25" value="2" oninput="S.S2W=+this.value;go()"></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center"><span class="sln" style="color:var(--muted)">Height</span><span class="slv" id="lS2H" style="color:var(--good);font-size:10px">—</span></div>
+            <div class="sl" style="margin-top:5px"><div class="slr"><span class="sln">Length</span><span class="slv" id="lS2L">14.0"</span></div><input class="r2" type="range" min="2" max="72" step="0.5" value="14" oninput="S.S2L=+this.value;go()"></div>
+          </div>
+          <div id="posB">
+            <div style="font-size:9px;color:var(--muted);margin:3px 0 5px;text-transform:uppercase;letter-spacing:.8px">Position on face</div>
+            <div class="sl"><div class="slr"><span class="sln">H offset</span><span class="slv" id="lP2X">center</span></div><input class="r2" type="range" min="-30" max="30" step="0.5" value="-3" oninput="S.P2ox=+this.value;go()"></div>
+            <div class="sl" style="margin-top:5px"><div class="slr"><span class="sln">V offset</span><span class="slv" id="lP2Y">center</span></div><input class="r2" type="range" min="-20" max="20" step="0.5" value="-1" oninput="S.P2oy=+this.value;go()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">Stats</div>
+      <div class="mg">
+        <div class="mc"><div class="ml">Area A</div><div class="mv" id="mPA1">—<span class="mu">in²</span></div></div>
+        <div class="mc"><div class="ml">Area B</div><div class="mv" id="mPA2">—<span class="mu">in²</span></div></div>
+        <div class="mc"><div class="ml">Displ A</div><div class="mv" id="mPD1">—<span class="mu">in³</span></div></div>
+        <div class="mc"><div class="ml">Displ B</div><div class="mv" id="mPD2">—<span class="mu">in³</span></div></div>
+      </div>
+
+      <div class="tbw">
+        <div class="tbh"><span class="ml" style="margin:0">Tuning Quality</span><span id="tuneW" style="font-size:12px;font-weight:700">—</span></div>
+        <div class="tbar"><div class="tbfill"></div><div class="tbn" id="tbn" style="left:50%"></div></div>
+        <div class="tblabels"><span>20Hz</span><span>35Hz</span><span>55Hz+</span></div>
+      </div>
+      </div><!-- /portControls -->
+    </div>
+
+    <!-- SUB -->
+    <div class="pane" id="tab-sub">
+      <div class="sec">Mounting Face</div>
+      <div class="trow">
+        <button class="tbtn on" id="mnt-front" onclick="setMount('front')">Front</button>
+        <button class="tbtn"    id="mnt-top"   onclick="setMount('top')">Top</button>
+      </div>
+
+      <div class="sec">Number of Subs</div>
+      <div class="trow">
+        <button class="tbtn on" id="ns-1" onclick="setSubCount(1)">1</button>
+        <button class="tbtn"    id="ns-2" onclick="setSubCount(2)">2</button>
+        <button class="tbtn"    id="ns-3" onclick="setSubCount(3)">3</button>
+        <button class="tbtn"    id="ns-4" onclick="setSubCount(4)">4</button>
+        <button class="tbtn"    id="ns-5" onclick="setSubCount(5)">5</button>
+        <button class="tbtn"    id="ns-6" onclick="setSubCount(6)">6</button>
+      </div>
+
+      <div class="sec">Subwoofer Library</div>
+      <select id="drvSel" onchange="loadDriver(this.value)"
+        style="width:100%;background:var(--bg);border:1px solid var(--bord);border-radius:5px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 6px;outline:none;cursor:pointer">
+        <option value="">— Manual Entry —</option>
+      </select>
+      <div style="display:flex;gap:5px;margin-top:5px">
+        <input type="text" id="drvName" placeholder="Driver name…" maxlength="40"
+          style="flex:1;min-width:0;background:var(--bg);border:1px solid var(--bord);border-radius:5px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 6px;outline:none">
+        <button onclick="saveDriver()"
+          style="background:var(--acc);border:none;border-radius:5px;color:#000;font-size:10px;font-weight:700;padding:4px 10px;cursor:pointer">Save</button>
+        <button id="drvDelBtn" onclick="deleteDriver()"
+          style="background:var(--bg);border:1px solid var(--bord);border-radius:5px;color:var(--sub);font-size:10px;font-weight:600;padding:4px 8px;cursor:pointer">Delete</button>
+      </div>
+      <div id="drvStatus" style="font-size:9px;color:var(--good);padding:3px 2px;display:none"></div>
+
+      <div class="sec">Driver Specs</div>
+      <div class="sl"><div class="slr"><span class="sln">Cone Diameter</span><span class="slv" id="lSD">12"</span></div><input type="range" id="rSD" min="6" max="21" step="1" value="12" oninput="S.SD=+this.value;drvManual();go()"></div>
+      <div class="sl"><div class="slr"><span class="sln">Displacement (each)</span><span class="slv" id="lSDisp">0.10 ft³</span></div><input type="range" id="rSDisp" min="0.03" max="0.5" step="0.01" value="0.1" oninput="S.SDisp=+this.value;drvManual();go()"></div>
+      <div class="sl"><div class="slr"><span class="sln">Xmax</span><span class="slv" id="lXmax">12 mm</span></div><input type="range" id="rXmax" min="6" max="40" step="1" value="12" oninput="S.Xmax=+this.value;drvManual();go()"></div>
+      <div class="sl"><div class="slr"><span class="sln">RMS Power (total)</span><span class="slv" id="lRMS">500 W</span></div><input type="range" id="rRMS" min="100" max="10000" step="50" value="500" oninput="S.RMS=+this.value;drvManual();go()"></div>
+
+      <div class="sec">T/S Parameters <span style="font-size:9px;color:var(--muted);font-weight:400">(optional — improves freq response)</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div class="ctrl">
+          <div class="ctrl-row"><span class="sln">Fs (Hz)</span><span class="slv" id="lFs">—</span></div>
+          <input type="number" inputmode="decimal" id="inFs" min="10" max="200" step="0.1" placeholder="e.g. 28"
+            style="width:100%;background:var(--bg);border:1px solid var(--bord);border-radius:5px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:16px;padding:9px 11px;outline:none"
+            oninput="S.Fs=+this.value||0;drvManual();go()">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row"><span class="sln">Qts</span><span class="slv" id="lQts">—</span></div>
+          <input type="number" inputmode="decimal" id="inQts" min="0.1" max="2" step="0.01" placeholder="e.g. 0.38"
+            style="width:100%;background:var(--bg);border:1px solid var(--bord);border-radius:5px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:16px;padding:9px 11px;outline:none"
+            oninput="S.Qts=+this.value||0;drvManual();go()">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row"><span class="sln">Vas (L)</span><span class="slv" id="lVas">—</span></div>
+          <input type="number" inputmode="decimal" id="inVas" min="1" max="500" step="0.1" placeholder="e.g. 85"
+            style="width:100%;background:var(--bg);border:1px solid var(--bord);border-radius:5px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:16px;padding:9px 11px;outline:none"
+            oninput="S.Vas=+this.value||0;drvManual();go()">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row"><span class="sln">Pe (W)</span><span class="slv" id="lPe">—</span></div>
+          <input type="number" inputmode="decimal" id="inPe" min="10" max="5000" step="10" placeholder="e.g. 500"
+            style="width:100%;background:var(--bg);border:1px solid var(--bord);border-radius:5px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:16px;padding:9px 11px;outline:none"
+            oninput="S.Pe=+this.value||0;drvManual();go()">
+        </div>
+      </div>
+      <div id="tsStatus" style="font-size:9px;padding:3px 2px;display:none"></div>
+
+      <div class="sec">Quick Numbers</div>
+      <div class="scap">Rough estimates from cone size and power — no T/S needed.</div>
+      <div class="mg">
+        <div class="mc"><div class="ml">Cone Area (ea)</div><div class="mv" id="mSd">—<span class="mu">cm²</span></div>
+          <div class="mn">Sd — surface area of one cone</div></div>
+        <div class="mc"><div class="ml">Max SPL (Xmax)</div><div class="mv" id="mSPL">—<span class="mu">dB</span></div>
+          <div class="mn">Loudest at tuning before the cone runs out of travel</div></div>
+        <div class="mc"><div class="ml">Total Displacement</div><div class="mv" id="mTotDisp">—<span class="mu">ft³</span></div>
+          <div class="mn">Space the drivers take up inside the box</div></div>
+        <div class="mc"><div class="ml">Sub Count</div><div class="mv" id="mSubCt">1</div>
+          <div class="mn">Drivers in this design</div></div>
+        <div class="mc full"><div class="ml">Port Vel @ Tuning</div><div class="mv" id="mPVmax">—<span class="mu">m/s</span></div>
+          <div class="mn">Ballpark air speed at Fb. Under ~17 m/s avoids port noise — see the Port Vel graph below for the real curve</div></div>
+      </div>
+
+      <div class="sec">Baffle</div>
+      <div class="trow">
+        <button class="tbtn on" id="db-off" onclick="setDoubleBaffle(false)">Single Baffle</button>
+        <button class="tbtn"    id="db-on"  onclick="setDoubleBaffle(true)">Double Baffle</button>
+      </div>
+      <div id="dbInfo" style="display:none;font-size:10px;color:var(--good);padding:4px 2px">
+        ✓ Two layers of <span id="dbThick">—</span> on mounting face
+      </div>
+
+      <div class="sec">Response Analysis</div>
+      <div class="scap">Full simulation of this box + driver at your RMS power. Needs Fs, Qts and Vas.</div>
+      <div class="trow" style="margin-bottom:6px">
+        <button class="tbtn on" id="gr-spl" onclick="setGraph('spl')">SPL</button>
+        <button class="tbtn"    id="gr-exc" onclick="setGraph('exc')">Excursion</button>
+        <button class="tbtn"    id="gr-vel" onclick="setGraph('vel')">Port Vel</button>
+      </div>
+      <div class="fw"><canvas id="freqC" height="210" style="width:100%;display:block;cursor:crosshair;touch-action:none"></canvas></div>
+      <div id="grHint" style="font-size:9px;color:var(--sub);padding:4px 2px;line-height:1.4">
+        How loud the box plays at each frequency <span style="color:var(--muted)">· drag to read values</span>
+      </div>
+      <div class="mg">
+        <div class="mc"><div class="ml">F3 — Low-End Limit</div><div class="mv" id="mF3">—<span class="mu">Hz</span></div>
+          <div class="mn">Output drops 3 dB below peak here. Lower = deeper bass</div></div>
+        <div class="mc"><div class="ml">Peak SPL</div><div class="mv" id="mPkSPL">—<span class="mu">dB</span></div>
+          <div class="mn">Loudest point of the curve at your RMS power</div></div>
+        <div class="mc full"><div class="ml">Max Cone Travel</div><div class="mv" id="mPkExc">—<span class="mu">mm</span></div>
+          <div class="mn">Furthest the cone moves anywhere from 10–200 Hz, and how much of Xmax that uses. Over 100% = risk of damage</div></div>
+      </div>
+    </div>
+
+    <!-- CUT SHEET -->
+    <div class="pane" id="tab-cuts">
+      <div class="sec">Cut List</div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:4px">All dimensions in inches · Wood thickness: <span id="csT">—</span></div>
+      <div id="cutList" style="display:flex;flex-direction:column;gap:5px"></div>
+
+      <div class="sec" style="margin-top:4px">Sub Cutout</div>
+      <div class="mg">
+        <div class="mc"><div class="ml">Cutout Dia.</div><div class="mv" id="csCutout">—<span class="mu">in</span></div></div>
+        <div class="mc"><div class="ml">Baffle Layers</div><div class="mv" id="csBaffle">—</div></div>
+        <div class="mc"><div class="ml">Sub Count</div><div class="mv" id="csSubCt">—</div></div>
+        <div class="mc"><div class="ml">Qty Cutouts</div><div class="mv" id="csSubCt2">—</div></div>
+      </div>
+
+      <div id="portCutsWrap">
+        <div class="sec" style="margin-top:4px">Slot Port Walls</div>
+        <div id="portCuts" style="display:flex;flex-direction:column;gap:5px"></div>
+      </div>
+
+      <div class="sec" style="margin-top:4px">Board Feet</div>
+      <div class="mg">
+        <div class="mc"><div class="ml">Total Area</div><div class="mv" id="csBdFt">—<span class="mu">ft²</span></div></div>
+        <div class="mc"><div class="ml">4×8 Sheets</div><div class="mv" id="csSheets">—</div></div>
+      </div>
+
+      <div style="margin-top:6px" class="noprint">
+        <button onclick="printCuts()" style="width:100%;padding:8px;background:var(--acc);color:#000;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">🖨 Print / Save PDF</button>
+      </div>
+
+      <div class="dcard noprint" id="donateCard" style="display:none">
+        <div class="dtitle">☕ Support Prokzi Designs</div>
+        <div class="dtext">This tool is free and always will be. If it saved you a build — or a blown sub — a tip helps keep it going.</div>
+        <div class="dbtns" id="donateBtns"></div>
+      </div>
+
+      <div id="sfootIn" class="noprint">
+        <span class="copyline" id="copyLine">© 2026 Prokzi Designs</span>
+        <button class="legalbtn" onclick="openLegal()">Legal</button>
+      </div>
+    </div>
+
+    </div><!-- /scontent -->
+
+  <!-- LEGAL NOTICE -->
+  <div id="legalOverlay" onclick="if(event.target===this)closeLegal()">
+    <div id="legalBox">
+      <div id="legalHead">
+        <span class="lt">Legal Notice &amp; Terms of Use</span>
+        <button class="lclose" onclick="closeLegal()">Close</button>
+      </div>
+      <div id="legalBody">
+        <h4>Ownership</h4>
+        <p><b id="legalCopy">© 2026 Prokzi Designs. All rights reserved.</b></p>
+        <p>The Prokzi Designs Enclosure Creator — including its source code, user interface,
+        layout and visual design, calculation methods, subwoofer parameter database and the
+        cut sheets it generates — is the exclusive property of Prokzi Designs and is protected
+        by copyright law.</p>
+
+        <h4>What You May Do</h4>
+        <ul>
+          <li>Use this tool to design enclosures, for personal or commercial work.</li>
+          <li><b>Build, sell and share the physical enclosures</b> you design with it — the boxes you
+          build are yours, and no royalty or attribution is owed on them.</li>
+          <li>Print or export cut sheets for your own builds and customers.</li>
+        </ul>
+
+        <h4>What You May Not Do</h4>
+        <ul>
+          <li>Copy, redistribute, host, mirror or share the software or its source code.</li>
+          <li>Resell, rent, sublicense or bundle it with a product or service.</li>
+          <li>Rebrand it, remove attribution, or pass it off as your own work.</li>
+          <li>Create derivative works, ports or modified versions.</li>
+          <li>Extract the subwoofer database or calculation code for use in other software.</li>
+        </ul>
+        <p>Written permission from Prokzi Designs is required for any of the above.</p>
+
+        <h4>No Warranty</h4>
+        <p>This software is provided <b>"as is", without warranty of any kind</b>, express or implied,
+        including but not limited to merchantability, fitness for a particular purpose and
+        non-infringement.</p>
+        <p>All results — volumes, tuning frequencies, response curves, excursion and port
+        velocity figures, and cut dimensions — are <b>engineering estimates based on the values you
+        enter</b>. Real enclosures vary with materials, build accuracy, driver tolerances and vehicle
+        acoustics. <b>Always verify dimensions before cutting and confirm your design against the
+        driver manufacturer's specifications.</b></p>
+
+        <h4>Limitation of Liability</h4>
+        <p>To the fullest extent permitted by law, Prokzi Designs shall not be liable for any
+        damages arising from use of this software — including damaged drivers, amplifiers or
+        vehicles, wasted materials, mis-cut panels, lost time, lost profit, or any indirect or
+        consequential loss.</p>
+        <p><b>You are responsible for your own build.</b> Use appropriate safety equipment and follow
+        safe practice when operating power tools.</p>
+
+        <h4>Trademarks</h4>
+        <p>"Prokzi Designs" and the Prokzi Designs logo are trademarks of Prokzi Designs.
+        Subwoofer manufacturer and model names shown in the driver library are the trademarks of
+        their respective owners and are used for identification only. Their inclusion does not
+        imply any affiliation with, endorsement by, or verification from those manufacturers, and
+        published parameters may differ from the units you own.</p>
+
+        <h4>Third-Party Components</h4>
+        <p>3D rendering uses <b>three.js</b> — Copyright © 2010–2026 three.js authors, MIT License.
+        Typefaces (<b>Space Grotesk</b>, <b>JetBrains Mono</b>) are served by Google Fonts under the
+        SIL Open Font License. These components remain the property of their respective authors
+        and are used under their licenses.</p>
+
+        <h4>Contact</h4>
+        <p id="legalContact">For licensing, permissions or to report unauthorized use, contact Prokzi Designs.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="printMark">Designed with Prokzi Designs Enclosure Creator · © 2026 Prokzi Designs</div>
+
+  <!-- BOTTOM TAB BAR -->
+  <div id="stabbar">
+    <button class="stab on" onclick="switchTab('bp')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="5" width="18.4" height="14" rx="2"/><path d="M12 5v14"/><circle cx="16.6" cy="12" r="2.6"/></svg>Type</button>
+    <button class="stab" onclick="switchTab('box')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>Size</button>
+    <button class="stab" onclick="switchTab('ports')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="3.4"/></svg>Ports</button>
+    <button class="stab" onclick="switchTab('sub')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.8" width="12" height="18.4" rx="2"/><circle cx="12" cy="14.2" r="4"/><circle cx="12" cy="7.2" r="1.3"/></svg>Sub</button>
+    <button class="stab" onclick="switchTab('cuts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Cuts</button>
+  </div>
+
+</div><!-- /app -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+//  DONATION LINKS — put your own handles here. Leave a value as '' to hide that
+//  button. Enter just the handle, not the full URL.
+// ══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+//  OWNERSHIP — drives the copyright lines, the Legal notice and the print footer
+// ══════════════════════════════════════════════════════════════════════════════
+const LEGAL={
+  owner:'Prokzi Designs',
+  year:2026,                 // first published year
+  contact:''                 // optional: email or site shown in the Legal notice
+};
+
+const DONATE={
+  cashapp:'ProkziDesigns',   // $Cashtag        → cash.app/$ProkziDesigns
+  venmo:'ProkziDesigns',     // Venmo username  → venmo.com/u/ProkziDesigns
+  paypal:'ProkziDesigns'     // PayPal.me name  → paypal.me/ProkziDesigns
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const S={
+  W:24,H:16,D:18,T:0.75,
+  ptype:'slot',layout:'dual',portGroup:'slot',   // ported starts as one slot port
+  Aon:true,Bon:true,
+  P1D:4,P1L:12,P1ox:3,P1oy:1,
+  P2D:4,P2L:12,P2ox:-3,P2oy:-1,
+  S1W:2,S1H:4,S1L:14,S1BW:0,S1BH:0,
+  S2W:2,S2H:4,S2L:14,
+  mount:'front',SubX:0,SubY:0,doubleBaffle:false,
+  encl:'sealed',bpDiv:9,
+  subCount:1,Fs:0,Qts:0,Vas:0,Pe:0,
+  SD:12,SDisp:0.10,Xmax:12,RMS:500
+};
+
+// ── RENDERER — sized explicitly from DOM ──────────────────────────────────────
+const cv=document.getElementById('c3d');
+
+// Compute canvas pixel size from its wrapper element
+function canvasWH(){
+  const r = cv.parentElement.getBoundingClientRect();
+  return { w: Math.max(1, Math.round(r.width)), h: Math.max(1, Math.round(r.height)) };
+}
+
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:false});
+renderer.setClearColor(0x0b0c0f,1);
+renderer.shadowMap.enabled=true;
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(42,1,0.1,5000);
+
+function resizeCam(){
+  const {w,h}=canvasWH();
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(w,h,false);  // false = don't touch CSS
+  cv.style.width=w+'px';
+  cv.style.height=h+'px';
+  camera.aspect=w/h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize',resizeCam);
+window.addEventListener('orientationchange',()=>setTimeout(()=>{resizeCam();camUpdate();},300));
+if(window.visualViewport) visualViewport.addEventListener('resize',resizeCam);
+
+// ── LIGHTS ────────────────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0x445566,1.1));
+const sun=new THREE.DirectionalLight(0xfff8f0,1.0);
+sun.position.set(100,160,80);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+const rim=new THREE.DirectionalLight(0xf97316,.3);
+rim.position.set(-80,-50,-60);scene.add(rim);
+const fill=new THREE.DirectionalLight(0x38bdf8,.15);
+fill.position.set(80,-50,30);scene.add(fill);
+
+// ── GRID ─────────────────────────────────────────────────────────────────────
+const grid=new THREE.GridHelper(1000,80,0x1a1d25,0x141620);
+scene.add(grid);
+
+// ── MATERIALS ─────────────────────────────────────────────────────────────────
+const MAT={
+  wood:  new THREE.MeshStandardMaterial({color:0x1d2131,roughness:.72,metalness:.04}),
+  lid:   new THREE.MeshStandardMaterial({color:0x252a3c,roughness:.68,metalness:.04}),
+  ghost: new THREE.MeshStandardMaterial({color:0x2a3050,roughness:.6,transparent:true,opacity:.12,side:THREE.DoubleSide}),
+  edge:  new THREE.LineBasicMaterial({color:0xf97316}),
+  edgeI: new THREE.LineBasicMaterial({color:0x283040}),
+  p1:    new THREE.MeshStandardMaterial({color:0x38bdf8,roughness:.25,metalness:.6,emissive:0x1a6080,emissiveIntensity:.5}),
+  p2:    new THREE.MeshStandardMaterial({color:0xa78bfa,roughness:.25,metalness:.6,emissive:0x5a4080,emissiveIntensity:.5}),
+  sbask: new THREE.MeshStandardMaterial({color:0x2a2d38,roughness:.5,metalness:.45}),
+  sring: new THREE.MeshStandardMaterial({color:0x909090,roughness:.25,metalness:.9}),
+  scone: new THREE.MeshStandardMaterial({color:0x0c0c0e,roughness:.9}),
+  sdust: new THREE.MeshStandardMaterial({color:0x181818,roughness:.85}),
+};
+
+// ── SCENE GROUP ───────────────────────────────────────────────────────────────
+const G=new THREE.Group();
+scene.add(G);
+
+function clearG(){while(G.children.length)G.remove(G.children[0]);}
+
+function mesh(geo,mat,x,y,z,rx,ry,rz){
+  const m=new THREE.Mesh(geo,mat);
+  m.position.set(x,y,z);
+  if(rx!=null)m.rotation.set(rx,ry||0,rz||0);
+  m.castShadow=m.receiveShadow=true;
+  G.add(m);return m;
+}
+function edge(geo,x,y,z,rx,ry,rz,mat){
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(geo),mat||MAT.edgeI);
+  e.position.set(x,y,z);
+  if(rx!=null)e.rotation.set(rx,ry||0,rz||0);
+  G.add(e);
+}
+function panel(pw,ph,pd,x,y,z,mat,outline){
+  const g=new THREE.BoxGeometry(pw,ph,pd);
+  mesh(g,mat,x,y,z);
+  edge(g,x,y,z,0,0,0,outline?MAT.edge:MAT.edgeI);
+}
+
+// ── BUILD BOX ─────────────────────────────────────────────────────────────────
+// ── 4TH ORDER BANDPASS GEOMETRY ───────────────────────────────────────────────
+// Divider runs parallel to the front baffle: sealed chamber behind it, ported
+// chamber in front. The divider IS the subwoofer mounting baffle and is always
+// a DOUBLE layer (2 × wood thickness = 1.5" with 3/4" stock).
+// bpDiv = clear depth of the sealed rear chamber, measured from the inside face
+// of the back panel to the rear face of the sub baffle.
+function bpGeom(){
+  const {W,H,D,T}=S;
+  if(S.encl!=='bp4') return null;
+  const iW=W-2*T, iH=H-2*T, iD=D-2*T;
+  const DT=2*T;                                    // sub baffle — double layer
+  const maxRear=Math.max(0.5, iD-DT-0.5);
+  const rearD=Math.min(Math.max(S.bpDiv,0.5), maxRear);
+  const zBack=T+rearD;
+  const zc=zBack+DT/2;
+  const frontD=Math.max(0.5,(D-T)-(zBack+DT));
+  return {mode:'bp4', zc, zBack, DT, iW,iH,iD, divW:iW, divH:iH, maxRear, rearD, frontD,
+    rear :{x0:T,x1:W-T, y0:T,y1:H-T, z0:T,          z1:zBack, span:rearD,  vol:iW*iH*rearD},
+    front:{x0:T,x1:W-T, y0:T,y1:H-T, z0:zBack+DT,   z1:D-T,   span:frontD, vol:iW*iH*frontD}};
+}
+function bpMaxPortW(ch){ return Math.max(1,(ch.x1-ch.x0)-2*S.T); }
+function bpPortW(ch,val){ const m=bpMaxPortW(ch); return (val>0)?Math.min(val,m):m; }
+function bpPortLegs(ch,sw,sl){
+  const T=S.T;
+  const availZ=Math.max(0.5,(ch.z1-ch.z0)-T);
+  const leg1=Math.min(sl,availZ);
+  const availY=Math.max(0,(ch.y1-ch.y0)-sw-2*T);
+  const leg2=sl>leg1?Math.min(sl-leg1,availY):0;
+  return {leg1,leg2,availZ,availY,fits:sl<=leg1+availY+0.01};
+}
+// Slot duct running back from the front face along the chamber floor, folding up
+function spawnBPPort(ch,sw,sl,portW,mat,eMat){
+  const T=S.T, WT=T;
+  const {leg1,leg2}=bpPortLegs(ch,sw,sl);
+  const cx=(ch.x0+ch.x1)/2;
+  const lidW=Math.min(portW+2*WT, ch.x1-ch.x0);
+  const zMid=ch.z1-leg1/2, yLid=ch.y0+sw+WT/2;
+  baffleWall(cx, yLid, zMid, lidW, WT, leg1, mat, eMat);
+  baffleWall(cx-portW/2-WT/2, ch.y0+sw/2, zMid, WT, sw, leg1, mat, eMat);
+  baffleWall(cx+portW/2+WT/2, ch.y0+sw/2, zMid, WT, sw, leg1, mat, eMat);
+  if(leg2>0.1){
+    const zB=ch.z1-leg1-WT/2, yMid=yLid+WT/2+leg2/2;
+    baffleWall(cx, yMid, zB, lidW, leg2, WT, mat, eMat);
+    baffleWall(cx-portW/2-WT/2, yMid, zB, WT, leg2, WT, mat, eMat);
+    baffleWall(cx+portW/2+WT/2, yMid, zB, WT, leg2, WT, mat, eMat);
+  }
+}
+
+function buildBox(){
+  clearG();
+  const {W,H,D,T,mount,SD,Aon,Bon,ptype,layout,doubleBaffle}=S;
+  const n = Math.max(1, S.subCount||1);
+
+  // Construction model:
+  //   Top & Bottom = FULL footprint W × D (they cap everything)
+  //   Sides        = (D − T) deep × (H − 2T) tall — butt against the back panel,
+  //                  extend flush to the front face. ALWAYS identical, both sides.
+  //   Back         = W wide × (H − 2T) tall — full width, fits between top & bottom
+  //   Front        = sits BETWEEN the side walls: (W − 2T) wide, minus each open
+  //                  slot port's opening width. Only the front panel is ever "odd".
+  const wallH = H - 2*T;   // every vertical panel & port wall is this tall
+  // Only a plain ported box cuts slot openings through the side walls
+  const sideSlots = S.encl==='std';
+  const openLeft  = sideSlots && ((layout==='dual' && Aon) || (layout==='dualboth' && Aon));
+  const openRight = sideSlots && (layout==='dualboth' && Bon);
+  const cutL   = T + (openLeft  ? S.S1W : 0);
+  const cutR   = T + (openRight ? S.S1W : 0);
+  const frontW = Math.max(0.01, W - cutL - cutR);
+
+  // Center slot: the front is TWO panels with the port gap between them
+  const centerPort = sideSlots && ptype==='slot' && layout==='center' && Aon;
+  const cHalf = Math.max(0.01,(W-2*T-S.S1W)/2);
+
+  panel(W,      T,     D,   W/2,             T/2, D/2,     MAT.wood, true);   // bottom — full W×D
+  panel(T,      wallH, D-T, T/2,             H/2, (T+D)/2, MAT.wood, true);   // left  — flush to front
+  panel(T,      wallH, D-T, W-T/2,           H/2, (T+D)/2, MAT.wood, true);   // right — flush to front
+  panel(W,      wallH, T,   W/2,             H/2, T/2,     MAT.wood, true);   // back — full width
+  if(centerPort){
+    panel(cHalf, wallH, T, T+cHalf/2,     H/2, D-T/2, MAT.ghost, true);       // front left of port
+    panel(cHalf, wallH, T, W-T-cHalf/2,   H/2, D-T/2, MAT.ghost, true);       // front right of port
+  }else{
+    panel(frontW, wallH, T, cutL + frontW/2, H/2, D-T/2, MAT.ghost,true);     // front — between the sides, notched for port exits
+  }
+
+  const bg = bpGeom();
+
+  // Double baffle — second panel on the OUTSIDE of the mounting face (identical cut to the inner layer)
+  // Bandpass mounts its drivers on the internal divider instead, so the outer face stays single.
+  if(doubleBaffle && !bg){
+    if(mount==='front'){
+      if(centerPort){
+        panel(cHalf, wallH, T, T+cHalf/2,   H/2, D+T/2, MAT.lid, true);
+        panel(cHalf, wallH, T, W-T-cHalf/2, H/2, D+T/2, MAT.lid, true);
+      }else{
+        panel(frontW, wallH, T, cutL + frontW/2, H/2, D+T/2, MAT.lid, true);
+      }
+    }
+    else                panel(W, T, D, W/2, H+T/2, D/2, MAT.lid, true); // top
+  }
+
+  // Top panel — full W×D footprint, shown floating (drops into y = H−T … H when closed)
+  panel(W, T, D, W/2, H+2, D/2, MAT.lid, true);
+
+  // ── BANDPASS SUB BAFFLE — two laminated layers, drawn separately ──
+  if(bg){
+    panel(bg.iW, bg.iH, T, W/2, H/2, bg.zBack+T/2,   MAT.wood, true);  // rear layer
+    panel(bg.iW, bg.iH, T, W/2, H/2, bg.zBack+T+T/2, MAT.lid,  true);  // front layer
+  }
+
+  // ── SUBS — grid layout ──
+  const subR = (SD/2) * 0.82;
+  const cols  = n<=1?1 : n<=2?2 : n<=4?2 : 3;
+  const rows  = Math.ceil(n/cols);
+
+  // Interior face bounds — bandpass drivers sit on the divider, not an outer wall
+  let faceW, faceH, x0, y0, z0, rotX=0;
+  if(bg){
+    faceW=W-2*T; faceH=H-2*T; x0=T; y0=T; z0=bg.zc; rotX=Math.PI/2;   // fires forward
+  } else if(mount==='front'){
+    faceW=W-2*T; faceH=H-2*T; x0=T; y0=T; z0=D-T/2; rotX=Math.PI/2;
+  } else {
+    // top — grid in X-Z plane, subs lay flat on top panel
+    faceW=W-2*T; faceH=D-2*T; x0=T; y0=H; z0=T; rotX=0;   // closed-top outer surface = H
+  }
+
+  const cellW = faceW/cols;
+  const cellH = faceH/rows;
+  let placed=0;
+  for(let r=0;r<rows&&placed<n;r++){
+    for(let c=0;c<cols&&placed<n;c++){
+      let cx,cy,cz;
+      if(mount==='top' && !bg){
+        cx = x0 + cellW*(c+0.5);
+        cy = y0;
+        cz = z0 + cellH*(r+0.5);
+      } else {
+        cx = x0 + cellW*(c+0.5);
+        cy = y0 + cellH*(r+0.5);
+        cz = z0;
+      }
+      buildDriver(cx, cy, cz, rotX, subR);
+      placed++;
+    }
+  }
+
+  // ── PORTS ──
+  buildPorts(W,H,D,T);
+
+  // Center group: box bottom on grid, centered XZ
+  G.position.set(-W/2,0,-D/2);
+}
+
+function buildDriver(cx,cy,cz,rx,r){
+  const T2=S.T;
+  // Basket
+  mesh(new THREE.CylinderGeometry(r+1,r+1,T2*2,48),MAT.sbask,cx,cy,cz,rx);
+  // Surround
+  const sg=new THREE.TorusGeometry(r,1.1,16,48);
+  const srx=rx===0?0:rx-Math.PI/2;
+  mesh(sg,MAT.sring,cx,cy,cz,srx);
+  // Spider ring
+  const spg=new THREE.TorusGeometry(r*.52,.65,12,36);
+  mesh(spg,MAT.sring,cx,cy,cz,srx);
+  // Cone — inward
+  const cg=new THREE.ConeGeometry(r*.88,r*.55,48,1,true);
+  const cm=mesh(cg,MAT.scone,cx,cy,cz,rx);
+  if(rx>0)cm.position.z-=T2*.5;
+  else if(rx<0)cm.position.z+=T2*.5;
+  else cm.position.y+=T2*.5;
+  // Dust cap
+  const dg=new THREE.SphereGeometry(r*.2,18,18,0,Math.PI*2,0,Math.PI/2);
+  const dm=mesh(dg,MAT.sdust,cx,cy,cz,rx===0?0:rx);
+  // Voice coil
+  const vg=new THREE.TorusGeometry(r*.21,.5,10,28);
+  mesh(vg,MAT.sring,cx,cy,cz,srx);
+}
+
+function buildPorts(W,H,D,T){
+  if(S.encl==='sealed') return;          // nothing to draw
+  const {Aon,Bon,layout}=S;
+
+  // ── 4th order bandpass — the port vents the front chamber out the front face ──
+  const bg=bpGeom();
+  if(bg){
+    if(S.ptype==='aero'){
+      const maxL=Math.max(0.5,bg.frontD-T);          // tube has to stay in the chamber
+      if(Aon) aeroPort(W/2+S.P1ox, H/2+S.P1oy, D, 'front', S.P1D, Math.min(S.P1L,maxL), MAT.p1);
+      if(Bon) aeroPort(W/2+S.P2ox, H/2+S.P2oy, D, 'front', S.P2D, Math.min(S.P2L,maxL), MAT.p2);
+    }else{
+      if(Aon) spawnBPPort(bg.front, S.S1W, S.S1L, bpPortW(bg.front,S.S1BW),
+        MAT.p1, new THREE.LineBasicMaterial({color:0x38bdf8}));
+    }
+    return;
+  }
+
+  if(layout==='aero'){
+    // Front Aero
+    if(Aon) spawnAero('A', W/2+S.P1ox, H/2+S.P1oy, D, 'front');
+    if(Bon) spawnAero('B', W/2+S.P2ox, H/2+S.P2oy, D, 'front');
+
+  } else if(layout==='aerotop'){
+    // Top Aero — tubes on top face
+    if(Aon) spawnAero('A', W/2+S.P1ox, H+T/2, D/2+S.P1oy, 'top');
+    if(Bon) spawnAero('B', W/2+S.P2ox, H+T/2, D/2+S.P2oy, 'top');
+
+  } else if(layout==='aeroside'){
+    // Side Aero — Port A left, Port B right
+    if(Aon) spawnAero('A', T/2, H/2+S.P1oy, D/2+S.P1ox, 'left');
+    if(Bon) spawnAero('B', W-T/2, H/2+S.P2oy, D/2+S.P2ox, 'right');
+
+  } else if(layout==='dual'){
+    // Single Slot — labyrinth port · walls fit between top & bottom panels
+    const sh=H-2*T, sw=S.S1W, sl=S.S1L, WT=T;
+    if(Aon) buildFrontSlot('A', W, H, D, T, sw, sh, sl, WT);
+
+  } else if(layout==='dualboth'){
+    // Dual Slot — mirrored walls, A=left B=right · walls fit between top & bottom panels
+    const sh=H-2*T, sw=S.S1W, sl=S.S1L, WT=T;
+    if(Aon) buildDualSlot('A', W, H, D, T, sw, sh, sl, WT);
+    if(Bon) buildDualSlot('B', W, H, D, T, sw, sh, sl, WT);
+
+  } else if(layout==='center'){
+    // Center Slot — two walls form a tunnel down the middle of the box; both
+    // chambers feed it around the walls' back ends, it vents out the front centre
+    if(Aon) buildCenterSlot(W, H, D, T);
+
+  } else if(layout==='back'){
+    // Bottom Slot
+    if(Aon){
+      const wy=T+S.S1W+S.T/2;
+      spawnBottomSlot(W/2, wy, D/2, W, H, D, T);
+    }
+  }
+}
+
+// ── CENTER SLOT — shared tunnel in the middle of the front baffle ─────────────
+function buildCenterSlot(W,H,D,T){
+  const mat  = MAT.p1;
+  const eMat = new THREE.LineBasicMaterial({color:0x38bdf8});
+  const sw   = S.S1W, WT=T, slotH=H-2*T;
+  // Walls must stop short of the back so the chambers can feed the tunnel —
+  // keep the rear gap at least as deep as the port opening is wide.
+  const maxLen = Math.max(1,(D-2*T)-sw);
+  const len    = Math.min(S.S1L, maxLen);
+  const zMid   = (D-T)-len/2, wy=H/2;
+  baffleWall(W/2-sw/2-WT/2, wy, zMid, WT, slotH, len, mat, eMat);
+  baffleWall(W/2+sw/2+WT/2, wy, zMid, WT, slotH, len, mat, eMat);
+}
+
+// ── FRONT SLOT — SINGLE (Single continuous channel labyrinth) ─────────────────
+function buildFrontSlot(which, W, H, D, T, sw, sh, sl, WT){
+  const mat  = MAT.p1;
+  const eMat = new THREE.LineBasicMaterial({color:0x38bdf8});
+  const wy   = H/2;
+
+  const iL = T;       // left inner face X
+  const iR = W - T;   // right inner face X
+  const iF = D - T;   // front inner face Z
+  const iB = T;       // back inner face Z
+
+  // Back connector sits at Z = iB + sw + WT/2
+  // Left wall runs from iF down to back connector front face = iB + sw + WT
+  // So left wall length = iF - (iB + sw + WT) = depthMax
+  // Left wall center = iF - depthMax/2
+  const backConnZ  = iB + sw + WT/2;
+  const frontConnZ = iF - sw - WT/2;
+  const depthMax   = iF - (iB + sw + WT); // left wall max run
+
+  let remaining = sl;
+  let pass = 0;
+
+  while(remaining > 0.01 && pass < 10){
+    const offset = pass * (WT + sw);
+
+    const leftX  = iL + sw + WT/2 + offset;
+    const rightX = iR - sw - WT/2 - offset;
+
+    if(leftX >= rightX - sw) break;
+
+    // Left wall: from front face (iF) toward back, stops at CENTER of back connector
+    // This gives a proper butt joint — leg 1 meets leg 2 at the centerline
+    const lMax = iF - (backConnZ - WT/2);
+    const lRun = Math.min(remaining, Math.max(0, lMax));
+    if(lRun > 0.01){
+      baffleWall(leftX, wy, iF - lRun/2, WT, sh, lRun, mat, eMat);
+      remaining -= lRun;
+      if(remaining <= 0.01) break;
+    }
+
+    // Back connector: fits between RIGHT FACE of left wall and LEFT FACE of right wall
+    const bStart = leftX + WT/2;
+    const bEnd   = rightX - WT/2;
+    const bMax   = bEnd - bStart;
+    const bRun   = Math.min(remaining, Math.max(0, bMax));
+    if(bRun > 0.01){
+      baffleWall(bStart + bRun/2, wy, backConnZ, bRun, sh, WT, mat, eMat);
+      remaining -= bRun;
+      if(remaining <= 0.01) break;
+    }
+
+    // Right wall: starts at BACK FACE of back connector (backConnZ - WT/2), grows toward front
+    // stops sw from front face
+    const rStart = backConnZ - WT/2;
+    const rMax   = iF - rStart - sw;
+    const rRun   = Math.min(remaining, Math.max(0, rMax));
+    if(rRun > 0.01){
+      baffleWall(rightX, wy, rStart + rRun/2, WT, sh, rRun, mat, eMat);
+      remaining -= rRun;
+      if(remaining <= 0.01) break;
+    }
+
+    // Front connector: from LEFT FACE of right wall to RIGHT FACE of next left wall
+    const nextLeftRightFace = iL + sw + WT + sw + offset + WT;
+    const fcStart = nextLeftRightFace;
+    const fcEnd   = rightX - WT/2;
+    const fcMax   = fcEnd - fcStart;
+    const fcRun   = Math.min(remaining, Math.max(0, fcMax));
+    if(fcRun > 0.01){
+      baffleWall(fcStart + fcRun/2, wy, frontConnZ, fcRun, sh, WT, mat, eMat);
+      remaining -= fcRun;
+      if(remaining <= 0.01) break;
+    }
+
+    // Front connector: spans from right wall center back to next left wall center
+    const nextLeftX = iL + sw + WT/2 + offset + WT + sw;
+    const fMax = rightX - nextLeftX;
+    const fRun = Math.min(remaining, Math.max(0, fMax));
+    if(fRun > 0.01){
+      baffleWall(rightX - fRun/2, wy, frontConnZ, fRun, sh, WT, mat, eMat);
+      remaining -= fRun;
+      if(remaining <= 0.01) break;
+    }
+
+    pass++;
+  }
+}
+
+// ── FRONT SLOT — DUAL (Simple mirrored walls, A=left B=right) ────────────────
+function buildDualSlot(which, W, H, D, T, sw, sh, sl, WT){
+  const mat  = which==='A' ? MAT.p1 : MAT.p2;
+  const eMat = new THREE.LineBasicMaterial({color: which==='A' ? 0x38bdf8 : 0xa78bfa});
+  const wallX = which==='A'
+    ? T + sw + WT/2
+    : W - T - sw - WT/2;
+  const xDir = which==='A' ? 1 : -1;
+
+  const maxLeg = D - 2*T - sw;
+  const leg1   = Math.min(sl, maxLeg);
+  baffleWall(wallX, H/2, (D-T) - leg1/2, WT, sh, leg1, mat, eMat);
+
+  if(sl > maxLeg){
+    const leg2    = Math.min(sl - maxLeg, maxLeg);
+    const wallX2  = wallX + xDir*(sw + WT);
+    baffleWall(wallX2, H/2, T + leg2/2, WT, sh, leg2, mat, eMat);
+  }
+}
+
+function spawnAero(which, wx, wy, wz, face){
+  const isA = which==='A';
+  const mat  = isA ? MAT.p1 : MAT.p2;
+  const d    = isA ? S.P1D : S.P2D;
+  const l    = isA ? S.P1L : S.P2L;
+  aeroPort(wx, wy, wz, face, d, l, mat);
+}
+
+function spawnBottomSlot(wx, wy, wz, W, H, D, T){
+  const mat  = MAT.p1;
+  const eMat = new THREE.LineBasicMaterial({color:0x38bdf8});
+  const sw   = S.S1W; // opening height
+  const sl   = S.S1L;
+  const WT   = T;
+  slotPort(wx, wy, wz, 'bottom-wall', sw, H-2*T, sl, mat, eMat);
+}
+
+function aeroPort(wx,wy,wz,face,dia,len,mat){
+  const r=dia/2, T=S.T;
+  // Ring on face + tube going inward
+  const fg=new THREE.TorusGeometry(r,.8,16,40);
+  const tg=new THREE.CylinderGeometry(r,r,len,32);
+  const eg=new THREE.TorusGeometry(r,.45,10,36);
+
+  if(face==='front'){
+    mesh(fg,mat,wx,wy,wz-T/2,Math.PI/2);
+    mesh(new THREE.TorusGeometry(r+.8,.35,10,40),mat,wx,wy,wz-T/2,Math.PI/2);
+    mesh(tg,mat,wx,wy,wz-T-len/2,Math.PI/2);
+    mesh(eg,mat,wx,wy,wz-T-len,Math.PI/2);
+  } else if(face==='back'){
+    mesh(fg,mat,wx,wy,wz+T/2,Math.PI/2);
+    mesh(tg,mat,wx,wy,wz+T+len/2,Math.PI/2);
+    mesh(eg,mat,wx,wy,wz+T+len,Math.PI/2);
+  } else if(face==='left'){
+    mesh(fg,mat,wx+T/2,wy,wz,0,Math.PI/2);
+    mesh(tg,mat,wx+T+len/2,wy,wz,0,0,Math.PI/2);
+    mesh(eg,mat,wx+T+len,wy,wz,0,Math.PI/2);
+  } else { // right
+    mesh(fg,mat,wx-T/2,wy,wz,0,-Math.PI/2);
+    mesh(tg,mat,wx-T-len/2,wy,wz,0,0,Math.PI/2);
+    mesh(eg,mat,wx-T-len,wy,wz,0,Math.PI/2);
+  }
+}
+
+function slotPort(wx,wy,wz,face,sw,sh,sl,mat,eMat){
+  // A slot port = a single flat baffle wall inside the box.
+  // Wall thickness = S.T, height = sh.
+  // The wall runs from the face inward (along Z for front/back,
+  // along Z for side-wall layouts since the wall is near a side panel).
+  // If sl exceeds the available interior run, a second leg folds back.
+  const WT=S.T;
+  const{W,H,D,T}=S;
+
+  if(face==='left-wall'||face==='right-wall'){
+    const wallX = face==='left-wall'
+      ? T + sw + WT/2
+      : W - T - sw - WT/2;
+
+    const xDir = face==='left-wall' ? 1 : -1;
+
+    if(S.Bon){
+      // Both ports ON — fold back toward front (symmetric)
+      const maxLeg = D - 2*T - sw;
+      const leg1 = Math.min(sl, maxLeg);
+      baffleWall(wallX, wy, (D-T) - leg1/2, WT, sh, leg1, mat, eMat);
+      if(sl > maxLeg){
+        const leg2 = Math.min(sl - maxLeg, maxLeg);
+        const wallX2 = face==='left-wall' ? wallX + sw + WT : wallX - sw - WT;
+        baffleWall(wallX2, wy, T + leg2/2, WT, sh, leg2, mat, eMat);
+      }
+    } else {
+      // Single port — continuous snake path
+      // Port air travels: front opening → depth leg 1 (front→back) → connector at back → depth leg 2 (back→front) → ...
+      // Each depth leg: WT thick, sh tall, up to depthRun long
+      // Each connector: WT thick in Z, sh tall, sw wide in X (the opening width maintained)
+      // Opening (sw) sits between: left wall & leg1, leg1 & leg2 (via connector), leg2 & leg3, etc.
+
+      const depthRun = D - 2*T - sw; // max depth each leg can run (stops sw from end wall)
+      const stepX    = sw + WT;       // X distance from center of one depth leg to center of next
+
+      let remaining   = sl;
+      let legIdx      = 0;
+      let goingToBack = true;
+
+      while(remaining > 0.01 && legIdx <= 10){
+        const legX = wallX + xDir * legIdx * stepX;
+
+        // Stop if outside interior
+        if(face==='left-wall' && legX + WT/2 > W - T - WT/2) break;
+        if(face==='right-wall'&& legX - WT/2 < T + WT/2)     break;
+
+        // Draw this depth leg — only as much as remaining allows
+        const dRun  = Math.min(remaining, depthRun);
+        const dMidZ = goingToBack
+          ? (D - T) - dRun/2          // starts at front inner face, grows toward back
+          : (T + sw + WT) + dRun/2;   // starts just past back connector, grows toward front
+        baffleWall(legX, wy, dMidZ, WT, sh, dRun, mat, eMat);
+        remaining -= dRun;
+        if(remaining <= 0.01) break;
+
+        // Draw connector at the end wall, sw wide, connecting this leg to next
+        // Connector sits between face of this leg and face of next leg
+        const cX  = legX + xDir * (WT/2 + sw/2);
+        const cZ  = goingToBack ? T + sw + WT/2 : D - T - sw - WT/2;
+        baffleWall(cX, wy, cZ, sw, sh, WT, mat, eMat);
+        // Connector is structural — does not consume port length
+
+        goingToBack = !goingToBack;
+        legIdx++;
+      }
+    }
+
+  } else if(face==='front'||face==='back'){
+    // Wall at wx (some X position), running from face inward along Z.
+    const maxLeg=D-2*T-WT;
+    const leg1=Math.min(sl,maxLeg);
+    const inward=face==='front'?-1:1;
+    const faceZ=wz;
+    const leg1MidZ=faceZ+inward*(T+leg1/2);
+    baffleWall(wx,wy,leg1MidZ, WT,sh,leg1, mat,eMat);
+
+    if(sl>maxLeg){
+      const foldZ=faceZ+inward*(T+leg1);
+      baffleWall(wx,wy,foldZ+inward*WT/2, WT,sh,WT, mat,eMat);
+      const leg2=Math.min(sl-maxLeg, maxLeg);
+      const leg2MidZ=foldZ-inward*leg2/2;
+      baffleWall(wx+WT,wy,leg2MidZ, WT,sh,leg2, mat,eMat);
+    }
+
+  } else if(face==='bottom-wall'){
+    const interiorW = W - 2*T;
+    const maxPW = W - 4*T;   // port + its two side walls must fit inside the interior
+    const portW = (S.S1BW > 0) ? Math.min(S.S1BW, maxPW) : maxPW;
+    const maxPortH = H - 2*T;   // vertical clearance between top & bottom panels
+    const portH = (S.S1BH > 0) ? Math.min(S.S1BH, maxPortH) : maxPortH;
+
+    // wy = T + sw + WT/2 (set by buildPorts using S1W as opening height)
+    const leg1EndZ = T + sw;
+    const maxLeg   = (D - T) - leg1EndZ;
+    const leg1     = Math.min(sl, maxLeg);
+    const leg1MidZ = (D - T) - leg1/2;
+
+    // Horizontal lid wall — spans port opening + both side walls (touches box walls at full width)
+    const lidW = Math.min(portW + 2*WT, interiorW);
+    baffleWall(wx, wy, leg1MidZ, lidW, WT, leg1, mat, eMat);
+
+    // Side walls under lid edges, outside the port opening
+    const sideH   = sw;
+    const sideMidY = T + sw/2;
+    baffleWall(wx - portW/2 - WT/2, sideMidY, leg1MidZ, WT, sideH, leg1, mat, eMat);
+    baffleWall(wx + portW/2 + WT/2, sideMidY, leg1MidZ, WT, sideH, leg1, mat, eMat);
+
+    if(sl > maxLeg){
+      const leg2Z      = T + sw + WT/2;
+      const leg2StartY = wy + WT/2;
+      const maxLeg2    = H - T - leg2StartY - sw;
+      const leg2       = Math.min(sl - maxLeg, Math.max(0, maxLeg2));
+      const leg2MidY   = leg2StartY + leg2/2;
+      baffleWall(wx, leg2MidY, leg2Z, lidW, leg2, WT, mat, eMat);
+      baffleWall(wx - portW/2 - WT/2, leg2MidY, leg2Z, WT, leg2, WT, mat, eMat);
+      baffleWall(wx + portW/2 + WT/2, leg2MidY, leg2Z, WT, leg2, WT, mat, eMat);
+    }
+
+  } else {
+    // left/right face for aero — guard
+    const maxLeg=W-2*T-WT;
+    const leg1=Math.min(sl,maxLeg);
+    const inward=face==='left'?1:-1;
+    const faceX=face==='left'?T:W-T;
+    baffleWall(faceX+inward*leg1/2,wy,wz, leg1,sh,WT, mat,eMat);
+  }
+}
+
+function baffleWall(x,y,z,pw,ph,pd,mat,eMat){
+  const g=new THREE.BoxGeometry(pw,ph,pd);
+  mesh(g,mat,x,y,z);
+  edge(g,x,y,z,0,0,0,eMat);
+}
+
+// ── ACOUSTICS ─────────────────────────────────────────────────────────────────
+function portData(){
+  // A sealed enclosure has no ports at all
+  if(S.encl==='sealed') return {a1:0,l1:0,d1:0,a2:0,l2:0,d2:0};
+  const {Aon,Bon,layout}=S;
+  const isAero   = layout==='aero'||layout==='aerotop'||layout==='aeroside';
+  const hasBoth  = isAero||(layout==='dualboth');
+  const bOK      = Bon && hasBoth;
+  const slotH    = S.H - 2*S.T;   // slot port height = interior height (fits between top & bottom panels)
+  const WT       = S.T;
+  // a = port cross-section area (in²) · l = port path length (in)
+  // d = physical displacement (in³) = port air column + port wall wood inside the box
+  let a1=0,l1=0,d1=0,a2=0,l2=0,d2=0;
+  if(Aon){
+    if(isAero){
+      a1=Math.PI*(S.P1D/2)**2; l1=S.P1L;
+      d1=a1*l1;                                        // thin-wall tube ≈ air column only
+    } else if(layout==='back'){
+      const iW=S.W-2*S.T;
+      const maxPW=S.W-4*S.T;   // port + its two side walls must fit inside the interior
+      const portW=(S.S1BW>0)?Math.min(S.S1BW,maxPW):maxPW;
+      a1=portW*S.S1W; l1=S.S1L;
+      d1=a1*l1 + (portW+2*WT)*WT*l1;                   // air + lid wall wood
+      if(portW < iW-0.01) d1 += 2*WT*S.S1W*l1;         // + side wall wood when narrower than interior
+    } else if(layout==='center'){
+      const maxLen=Math.max(1,(S.D-2*S.T)-S.S1W);      // rear gap ≥ opening width
+      a1=S.S1W*slotH; l1=Math.min(S.S1L,maxLen);
+      d1=a1*l1 + 2*WT*slotH*l1;                        // air + BOTH tunnel walls of wood
+    } else {
+      a1=S.S1W*slotH; l1=S.S1L;
+      d1=a1*l1 + WT*slotH*l1;                          // air + divider wall wood along the path
+    }
+  }
+  if(bOK){
+    if(isAero){
+      a2=Math.PI*(S.P2D/2)**2; l2=S.P2L;
+      d2=a2*l2;
+    } else {
+      a2=S.S1W*slotH; l2=S.S1L;
+      d2=a2*l2 + WT*slotH*l2;
+    }
+  }
+  return{a1,l1,d1,a2,l2,d2};
+}
+// Chamber volumes, port area and the front chamber's Helmholtz tuning.
+// The front chamber can be vented by aero tubes (A and/or B) or a slot duct.
+function bpCalc(){
+  const bg=bpGeom(); if(!bg) return null;
+  const T=S.T, n=Math.max(1,S.subCount||1);
+  const subDisp=S.SDisp*n*1728;                       // in³ — motors sit in the sealed chamber
+  const isAero=S.ptype==='aero';
+  const ec=(ar,l)=>{const r=Math.sqrt(ar/Math.PI)*.0254;return l*.0254+.85*r;};
+
+  let pA=null,pB=null;
+  if(isAero){
+    const maxL=Math.max(0.5, bg.frontD-T);            // tubes stay inside the chamber
+    const mk=(dia,want,on)=>{
+      if(!on) return null;
+      const ar=Math.PI*(dia/2)**2, len=Math.min(want,maxL);
+      return {a:ar, len, d:ar*len, fits:want<=maxL+0.01, want, dia, maxL};
+    };
+    pA=mk(S.P1D,S.P1L,S.Aon);
+    pB=mk(S.P2D,S.P2L,S.Bon);
+  }else{
+    if(S.Aon){
+      const pw=bpPortW(bg.front,S.S1BW);
+      const {leg1,leg2,availY}=bpPortLegs(bg.front,S.S1W,S.S1L);
+      const len=Math.min(S.S1L,leg1+leg2), ar=pw*S.S1W;
+      pA={a:ar, len, d:ar*len+(pw+2*T)*T*len+2*T*S.S1W*len,
+          fits:S.S1L<=leg1+availY+0.01, want:S.S1L, pw, leg1, leg2};
+    }
+  }
+  const a =(pA?pA.a:0)+(pB?pB.a:0);
+  const dv=(pA?pA.d:0)+(pB?pB.d:0);
+  const rearIn =Math.max(1, bg.rear.vol - subDisp);
+  const frontIn=Math.max(1, bg.front.vol - dv);
+
+  // Combined effective length: areas in parallel, same as the standard box path
+  let Fb=0, LeffM=0;
+  if(a>0&&frontIn>0){
+    let sum=0;
+    [pA,pB].forEach(p=>{ if(p&&p.a>0) sum += (p.a*6.4516e-4)/ec(p.a,p.len); });
+    const am=a*6.4516e-4;
+    LeffM = sum>0 ? am/sum : 0;
+    if(LeffM>0) Fb=(343/(2*Math.PI))*Math.sqrt(am/(LeffM*frontIn*1.6387e-5));
+  }
+  return {bg, isAero, pA, pB, a, d:dv, LeffM,
+    rearIn, frontIn, rearFt:rearIn/1728, frontFt:frontIn/1728, Fb};
+}
+
+function calcAc(){
+  const bpc=bpCalc();
+  if(bpc){
+    const {SD,Xmax,RMS,T,W,H,D}=S;
+    const Sd=Math.PI*((SD*.82/2)*.0254)**2;
+    const gIn=(W-2*T)*(H-2*T)*(D-2*T);
+    const a1=bpc.pA?bpc.pA.a:0, a2=bpc.pB?bpc.pB.a:0;
+    const Xm=Xmax/1000, omega=2*Math.PI*(bpc.Fb||30);
+    const a1m=a1*6.4516e-4, a2m=a2*6.4516e-4, totA=a1m+a2m;
+    const v1=a1m>0?Sd*Xm*omega/a1m:0;
+    const v2=a2m>0?Sd*Xm*omega/a2m:0;
+    const vC=totA>0?Sd*Xm*omega/totA:0;
+    return {nFt:bpc.rearFt+bpc.frontFt, gFt:gIn/1728, Fb:bpc.Fb, a1, a2,
+      pd1:bpc.pA?bpc.pA.d:0, pd2:bpc.pB?bpc.pB.d:0, v1, v2,
+      vMax:vC*Math.sqrt(RMS/500), Sd_cm2:Sd*10000,
+      SPL:20*Math.log10(Sd*Xm*omega*omega/2e-5)+10*Math.log10(RMS/500),
+      bp:bpc};
+  }
+  const{W,H,D,T,SD,SDisp,Xmax,RMS,subCount}=S;
+  const totalSubDisp = SDisp * subCount; // total displacement for all subs
+  const{a1,l1,d1,a2,l2,d2}=portData();
+  const iW=W-2*T,iH=H-2*T,iD=D-2*T;
+  const gIn=iW*iH*iD, pd1=d1, pd2=d2;   // displacement = port air + port wall wood
+  const nIn=Math.max(1,gIn-pd1-pd2-totalSubDisp*1728);
+  const nFt=nIn/1728, gFt=gIn/1728;
+  const Vb=nIn*1.6387e-5;
+  const a1m=a1*6.4516e-4,a2m=a2*6.4516e-4,totA=a1m+a2m;
+  const ec=(a,l)=>{const r=Math.sqrt(a/Math.PI)*.0254;return l*.0254+.73*r*2;};
+  const l1e=a1>0?ec(a1,l1):1,l2e=a2>0?ec(a2,l2):1;
+  const Leff=totA>0?(a1m+a2m)/((a1m>0?a1m/l1e:0)+(a2m>0?a2m/l2e:0)):1;
+  const Fb=(Vb>0&&totA>0&&Leff>0)?(343/(2*Math.PI))*Math.sqrt(totA/(Leff*Vb)):0;
+  const Sd=Math.PI*((SD*.82/2)*.0254)**2;
+  const Xm=Xmax/1000,omega=2*Math.PI*(Fb||30);
+  const v1=a1m>0?Sd*Xm*omega/a1m:0;
+  const v2=a2m>0?Sd*Xm*omega/a2m:0;
+  const vC=totA>0?Sd*Xm*omega/totA:0;
+  const vMax=vC*Math.sqrt(RMS/500);
+  const SPL=20*Math.log10(Sd*Xm*omega*omega/2e-5)+10*Math.log10(RMS/500);
+  return{nFt,gFt,Fb,a1,a2,pd1,pd2,v1,v2,vMax,Sd_cm2:Sd*10000,SPL};
+}
+
+// ── UI HELPERS ────────────────────────────────────────────────────────────────
+const vc=(v,g,w)=>v<=g?'good':v<=w?'warn':'bad';
+const st=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+const sh=(id,v)=>{const e=document.getElementById(id);if(e)e.innerHTML=v;};
+
+// ── MAIN UPDATE ───────────────────────────────────────────────────────────────
+function go(){
+  buildBox();
+  const ac=calcAc();
+  const{W,H,D,T,mount,ptype,layout,Aon,Bon}=S;
+
+  st('lW',S.W.toFixed(1)+'"');st('lH',S.H.toFixed(1)+'"');
+  st('lD',S.D.toFixed(1)+'"');st('lT',S.T.toFixed(2)+'"');
+  st('lP1D',S.P1D.toFixed(2)+'"');st('lP1L',S.P1L.toFixed(1)+'"');
+  st('lP2D',S.P2D.toFixed(2)+'"');st('lP2L',S.P2L.toFixed(1)+'"');
+  const slotH=H-2*T;   // slot ports fit between top & bottom panels
+  const interiorW=W-2*T;
+  st('lS1W',S.S1W.toFixed(2)+'"');
+  if(ac.bp){
+    const bpc=ac.bp, bg=bpc.bg;
+    st('lbpDiv', bg.rearD.toFixed(2)+'"');
+    st('mbpV1', bpc.rearFt.toFixed(3));
+    st('mbpV2', bpc.frontFt.toFixed(3));
+    st('mbpBaf', bg.DT.toFixed(2));
+    st('mbpFb',  bpc.Fb>0?bpc.Fb.toFixed(1):'—');
+    st('mbpArea',bpc.a>0?bpc.a.toFixed(2):'—');
+    const warn=[];
+    if(!bpc.isAero){
+      const mA=bpMaxPortW(bg.front);
+      const eA=document.getElementById('rS1BW');
+      if(eA){ eA.max=mA.toFixed(2); if(S.S1BW>mA){S.S1BW=mA;eA.value=mA;} }
+      const pwA=bpPortW(bg.front,S.S1BW);
+      st('lS1BW', pwA>=mA-0.01?'Full ('+pwA.toFixed(2)+'")':pwA.toFixed(2)+'"');
+      st('lS1Hlabel','Built Length');
+      st('lS1H', bpc.pA?bpc.pA.len.toFixed(1)+'"'+(bpc.pA.fits?'':' (clipped)'):'—');
+      if(bpc.pA&&!bpc.pA.fits) warn.push('Slot port won\'t fit the front chamber — modelled at '
+        +bpc.pA.len.toFixed(1)+'" instead of '+S.S1L.toFixed(1)+'". Deepen the box or move the baffle back.');
+    }else{
+      [['A',bpc.pA],['B',bpc.pB]].forEach(([k,p])=>{
+        if(p&&!p.fits) warn.push('Aero '+k+' is longer than the front chamber is deep — modelled at '
+          +p.len.toFixed(1)+'" instead of '+p.want.toFixed(1)+'". Max here is '+p.maxL.toFixed(1)+'".');
+      });
+    }
+    if(bpc.rearFt<0.05)  warn.push('Rear chamber is almost zero — move the sub baffle forward.');
+    if(bpc.frontFt<0.05) warn.push('Front chamber is almost zero — move the sub baffle back.');
+    if(bpc.a<=0) warn.push('No port on the front chamber — a 4th order needs one to make any output.');
+    const we=document.getElementById('bpWarn');
+    if(we){ we.innerHTML=warn.join('<br>'); we.style.display=warn.length?'':'none'; }
+  } else if(layout==='back'){    const bswEl=document.getElementById('rS1BW');
+    const maxPW=W-4*T;   // port + its two side walls must fit inside the interior
+    if(bswEl){bswEl.max=maxPW.toFixed(2);if(S.S1BW>maxPW){S.S1BW=maxPW;bswEl.value=S.S1BW;}}
+    const portW=(S.S1BW>0)?Math.min(S.S1BW,maxPW):maxPW;
+    st('lS1BW', portW>=maxPW-0.01?'Full ('+portW.toFixed(2)+'")':portW.toFixed(2)+'"');
+    st('lS1H', portW.toFixed(2)+'"');
+  } else {
+    st('lS1H', slotH.toFixed(2)+'"');
+  }
+  st('lS1L',S.S1L.toFixed(1)+'"');
+  st('lS2W',S.S2W.toFixed(2)+'"');st('lS2H',slotH.toFixed(2)+'"');st('lS2L',S.S2L.toFixed(1)+'"');
+  const iW=W-2*T,iH=H-2*T;
+  st('lP1X',S.P1ox===0?'center':(S.P1ox>0?'+':'')+S.P1ox.toFixed(1)+'"');
+  st('lP1Y',S.P1oy===0?'center':(S.P1oy>0?'+':'')+S.P1oy.toFixed(1)+'"');
+  st('lP2X',S.P2ox===0?'center':(S.P2ox>0?'+':'')+S.P2ox.toFixed(1)+'"');
+  st('lP2Y',S.P2oy===0?'center':(S.P2oy>0?'+':'')+S.P2oy.toFixed(1)+'"');
+  st('lSD',S.SD+'"');
+  st('lSDisp',S.SDisp.toFixed(2)+' ft³');
+  st('lXmax',S.Xmax+' mm');
+  st('lRMS',S.RMS.toLocaleString()+' W');
+
+  // T/S status
+  const tsEl=document.getElementById('tsStatus');
+  const hasTS=S.Fs>0&&S.Qts>0&&S.Vas>0;
+  if(tsEl){
+    tsEl.style.display=hasTS?'':'none';
+    tsEl.style.color='var(--good)';
+    tsEl.textContent=hasTS?`✓ T/S active — Fs:${S.Fs}Hz  Qts:${S.Qts}  Vas:${S.Vas}L`:'';
+  }
+  // Sub count label
+  const lFs=document.getElementById('lFs'); if(lFs) lFs.textContent=S.Fs?S.Fs+'Hz':'—';
+  const lQts=document.getElementById('lQts'); if(lQts) lQts.textContent=S.Qts?S.Qts:'—';
+  const lVas=document.getElementById('lVas'); if(lVas) lVas.textContent=S.Vas?S.Vas+'L':'—';
+  const lPe=document.getElementById('lPe'); if(lPe) lPe.textContent=S.Pe?S.Pe+'W':'—';
+
+  sh('mVol',`${ac.nFt.toFixed(3)}<span class="mu">ft³</span>`);
+  sh('mGross',`${ac.gFt.toFixed(3)}<span class="mu">ft³</span>`);
+  sh('mFb', S.encl==='sealed' ? `<span class="good">Sealed</span>`
+    : ac.Fb>0 ? `<span class="${vc(ac.Fb,45,60)}">${ac.Fb.toFixed(1)}</span><span class="mu">Hz</span>`
+    : `<span class="bad">No ports</span>`);
+
+  // Sealed alignment readouts (Fc / Qtc)
+  if(S.encl==='sealed'){
+    const n=Math.max(1,S.subCount||1);
+    const VbFt=Math.max(0.01,ac.nFt), VasFt=(S.Vas/1000)*n*35.3147;
+    if(S.Fs>0&&S.Qts>0&&S.Vas>0){
+      const k=Math.sqrt(1+VasFt/VbFt);
+      const Fc=S.Fs*k, Qtc=S.Qts*k;
+      st('mScFc', Fc.toFixed(1));
+      const qEl=document.getElementById('mScQ');
+      if(qEl) qEl.innerHTML=`<span class="${Qtc<=0.75?'good':Qtc<=0.9?'warn':'bad'}">${Qtc.toFixed(3)}</span>`;
+      st('mScQn', Qtc<0.55?'Very damped — tight but shy on output'
+        : Qtc<=0.75?'In the sweet spot (0.707 is maximally flat)'
+        : Qtc<=0.9?'Getting peaky — a bigger box would settle it'
+        : 'Boomy — box is too small for this driver');
+    }else{
+      st('mScFc','—'); st('mScQ','—');
+      st('mScQn','Enter Fs, Qts and Vas on the Sub tab');
+    }
+  }
+  sh('mV1',ac.a1>0?`<span class="${vc(ac.v1,17,25)}">${ac.v1.toFixed(1)}</span><span class="mu">m/s</span>`:'<span class="mu">—</span>');
+  sh('mV2',ac.a2>0?`<span class="${vc(ac.v2,17,25)}">${ac.v2.toFixed(1)}</span><span class="mu">m/s</span>`:'<span class="mu">—</span>');
+  sh('mPA1',`${ac.a1.toFixed(2)}<span class="mu">in²</span>`);
+  sh('mPA2',`${ac.a2.toFixed(2)}<span class="mu">in²</span>`);
+  sh('mPD1',`${ac.pd1.toFixed(0)}<span class="mu">in³</span>`);
+  sh('mPD2',`${ac.pd2.toFixed(0)}<span class="mu">in³</span>`);
+  sh('mSd',`${ac.Sd_cm2.toFixed(0)}<span class="mu">cm²</span>`);
+  sh('mSPL',`${Math.min(165,Math.max(80,ac.SPL)).toFixed(0)}<span class="mu">dB</span>`);
+  sh('mPVmax',`<span class="${vc(ac.vMax,17,25)}">${ac.vMax.toFixed(1)}</span><span class="mu">m/s</span>`);
+  sh('mTotDisp',`${(S.SDisp*S.subCount).toFixed(3)}<span class="mu">ft³</span>`);
+  st('mSubCt', S.subCount+'× sub');
+
+  st('hFb', S.encl==='sealed'?'Sealed':(ac.Fb>0?ac.Fb.toFixed(1)+' Hz':'—'));
+  st('hVol',ac.nFt.toFixed(3)+' ft³');
+  st('hMount',mount.charAt(0).toUpperCase()+mount.slice(1));
+
+  const isAeroL = layout==='aero'||layout==='aerotop'||layout==='aeroside';
+  const slotHud = H-2*T;
+  let pAd,showB;
+  if(ac.bp){
+    const b=ac.bp;
+    pAd = b.isAero ? `Ø${S.P1D}" L${(b.pA?b.pA.len:0).toFixed(1)}"`
+                   : `${S.S1W}"×${bpPortW(b.bg.front,S.S1BW).toFixed(1)}" L${(b.pA?b.pA.len:0).toFixed(1)}"`;
+    showB = b.isAero && Bon;
+  }else{
+    pAd = isAeroL ? `Ø${S.P1D}" L${S.P1L}"` : `${S.S1W}"×${slotHud.toFixed(1)}" L${S.S1L}"`;
+    showB = Bon&&(isAeroL||layout==='dualboth');
+  }
+  const pBd = ac.bp ? `Ø${S.P2D}" L${(ac.bp.pB?ac.bp.pB.len:0).toFixed(1)}"`
+            : isAeroL ? `Ø${S.P2D}" L${S.P2L}"` : pAd;
+  const sealed = S.encl==='sealed';
+  st('hudBox',`${W}"×${H}"×${D}"`+(ac.bp?'  4th Order':sealed?'  Sealed':''));
+  st('hudPA', (Aon&&!sealed)?'A: '+pAd:'A: OFF');
+  st('hudPB', (showB&&!sealed)?'B: '+pBd:'B: OFF');
+
+  const fbPct=Math.max(0,Math.min(100,(ac.Fb-20)/45*100));
+  document.getElementById('tbn').style.left=fbPct+'%';
+  let tw,tc;
+  if(S.encl==='sealed'){ tw='Sealed — no port';tc='var(--sub)'; }
+  else if(ac.bp){
+    // Bandpass port tuning sits higher by design — the ported-box thresholds
+    // don't apply, so report the type without judging it.
+    tw='4th Order — see graph';tc='var(--sub)';
+  }
+  else if(!ac.Fb){tw='No Ports';tc='var(--muted)';}
+  else if(ac.Fb<25){tw='Too Low';tc='var(--bad)';}
+  else if(ac.Fb<30){tw='Slightly Low';tc='var(--warn)';}
+  else if(ac.Fb<=42){tw='Ideal ✓';tc='var(--good)';}
+  else if(ac.Fb<=55){tw='Slightly High';tc='var(--warn)';}
+  else{tw='Too High';tc='var(--bad)';}
+  const twe=document.getElementById('tuneW');
+  twe.textContent=tw;twe.style.color=tc;
+
+  drawFreq(ac.Fb,ac.nFt);
+
+  // Keep the cut sheet current if it's the visible tab
+  const cutsPane=document.getElementById('tab-cuts');
+  if(cutsPane && cutsPane.classList.contains('on') && typeof buildCutSheet==='function') buildCutSheet();
+}
+
+// ── CONTROLS ──────────────────────────────────────────────────────────────────
+
+// Enclosure type — ported, sealed, or 4th order bandpass. Independent of port type.
+const ENC_DESC={
+  std:'A ported (vented) box uses a tuned port to extend low-end output around the tuning frequency. Set the port up on the Ports tab.',
+  sealed:'A sealed box is airtight — no port at all. Tighter, more gradual roll-off and the smallest enclosure for a given driver.',
+  bp4:'A 4th order splits the box with an internal baffle: a sealed chamber behind the cone and a ported chamber in front. Only the port reaches the outside, which gives the band-limited response these boxes are known for.'
+};
+function setEncl(m){
+  const prev = S.encl;
+  S.encl = (m==='bp4'||m==='sealed') ? m : 'std';
+  const bp = S.encl==='bp4', sealed = S.encl==='sealed';
+  const t=(id,on)=>{const e=document.getElementById(id); if(e) e.classList.toggle('on',on);};
+  t('enc-std',S.encl==='std'); t('enc-sealed',sealed); t('enc-bp4',bp);
+  const show=(id,v)=>{const e=document.getElementById(id); if(e) e.style.display=v?'':'none';};
+  show('bpBody',bp); show('bpPortNote',bp);
+  show('sealedBody',sealed);
+  show('sealedPortNote',sealed); show('portControls',!sealed);
+  st('encDesc', ENC_DESC[S.encl]);
+  // Grey the Ports tab when it has nothing to offer
+  const pTab=[...document.querySelectorAll('#stabbar .stab')]
+    .find(b=>(b.getAttribute('onclick')||'').includes("'ports'"));
+  if(pTab){ pTab.style.opacity = sealed?'.4':''; }
+  if(bp){
+    const rEl=document.getElementById('rbpDiv');
+    if(rEl){
+      const maxRear=Math.max(1, S.D-4*S.T-0.5);
+      rEl.min=1; rEl.max=maxRear.toFixed(2); rEl.step=0.25;
+      S.bpDiv=Math.min(Math.max(S.bpDiv,1),maxRear);
+      rEl.value=S.bpDiv;
+    }
+  }
+  // Switching into a ported box always starts on a single slot port
+  if(S.encl==='std' && prev!=='std'){ S.portGroup='slot'; S.layout='dual'; }
+  setLayout(S.layout);          // re-apply port UI under the new enclosure type
+}
+window.setEncl = setEncl;
+
+function setPortGroup(g){
+  S.portGroup = g;
+  ['aero','slot'].forEach(x=>{
+    const e=document.getElementById('pt-'+x); if(e) e.classList.toggle('on',x===g);
+  });
+  // Default sub-layout
+  if(g==='aero') setLayout('aero');
+  else           setLayout(S.Bon?'dualboth':'dual');
+}
+window.setPortGroup = setPortGroup;
+
+// Slot configuration — "Standard" is the side-wall mode and holds BOTH port cards.
+// Port B's own ON/OFF is what adds the second port:
+//   B off -> layout 'dual'      (Port A alone, folds across the back — unchanged)
+//   B on  -> layout 'dualboth'  (mirrored pair — unchanged)
+function setSlotConfig(c){
+  if(c==='bottom'){ setLayout('back'); return; }
+  if(c==='center'){ setLayout('center'); return; }
+  setLayout(S.Bon ? 'dualboth' : 'dual');
+}
+window.setSlotConfig = setSlotConfig;
+
+function setLayout(l){
+  S.layout = l;
+  S.ptype  = (l==='aero'||l==='aerotop'||l==='aeroside') ? 'aero' : 'slot';
+  const bp = S.encl==='bp4';
+
+  // Highlight correct sub-option button
+  ['aero','aerotop','aeroside'].forEach(x=>{ const e=document.getElementById('lay-'+x); if(e) e.classList.toggle('on',x===l); });
+  // "Single" stays lit whether one or two side ports are running
+  const eS=document.getElementById('lay-dual'); if(eS) eS.classList.toggle('on', l==='dual'||l==='dualboth');
+  const eC=document.getElementById('lay-center'); if(eC) eC.classList.toggle('on', l==='center');
+  const eB=document.getElementById('lay-back'); if(eB) eB.classList.toggle('on', l==='back');
+  // In the side-slot modes the layout IS the second-port state — keep Port B's switch in step
+  if(l==='dual'||l==='dualboth'){
+    S.Bon = (l==='dualboth');
+    const bBtn=document.getElementById('etB'), bBody=document.getElementById('pbB');
+    if(bBtn){ bBtn.textContent=S.Bon?'ON':'OFF'; bBtn.classList.toggle('on',S.Bon); }
+    if(bBody) bBody.classList.toggle('off',!S.Bon);
+  }
+  const isAeroP = S.ptype==='aero';
+  ['pt-aero','pt-slot'].forEach(id=>{const e=document.getElementById(id);
+    if(e) e.classList.toggle('on', id==='pt-aero'?isAeroP:!isAeroP);});
+
+  // ── 4th order: the port always vents the front chamber out the front face,
+  //    so the location / configuration sub-options don't apply. ──
+  if(bp){
+    document.getElementById('aeroOpts').style.display='none';
+    document.getElementById('slotOpts').style.display='none';
+    document.getElementById('aeroA').style.display = isAeroP?'':'none';
+    document.getElementById('slotA').style.display = isAeroP?'none':'';
+    document.getElementById('posA').style.display  = isAeroP?'':'none';
+    document.getElementById('bswRow').style.display = isAeroP?'none':'';
+    st('lS1Wlabel','Opening Height');
+    st('pAn', isAeroP?'Front Chamber — Aero A':'Front Chamber — Slot Port');
+    const pcB=document.getElementById('pcB');
+    if(isAeroP){
+      pcB.style.display=''; pcB.style.opacity=''; pcB.style.pointerEvents='';
+      document.getElementById('pbB').style.display='';
+      document.getElementById('slotBnote').style.display='none';
+      document.getElementById('aeroB').style.display='';
+      document.getElementById('slotB').style.display='none';
+      document.getElementById('posB').style.display='';
+      st('pBn','Front Chamber — Aero B');
+    }else{
+      pcB.style.display='none';
+    }
+    go();
+    return;
+  }
+  st('lS1Wlabel','Opening Width');
+  document.getElementById('aeroOpts').style.display = isAeroP ? '' : 'none';
+  document.getElementById('slotOpts').style.display = isAeroP ? 'none' : '';
+
+  const isAero   = S.ptype==='aero';
+  const isBottom = l==='back';
+  const isSingle = l==='dual';
+  const isDual   = l==='dualboth';
+
+  // Show/hide port controls
+  document.getElementById('aeroA').style.display = isAero ? '' : 'none';
+  document.getElementById('slotA').style.display = isAero ? 'none' : '';
+  document.getElementById('posA').style.display  = isAero ? '' : 'none';
+
+  // Port B visibility
+  const pcB = document.getElementById('pcB');
+  if(isAero){
+    // Aero: always show Port B with its own controls
+    pcB.style.display=''; pcB.style.opacity=''; pcB.style.pointerEvents='';
+    document.getElementById('pbB').style.display='';
+    document.getElementById('slotBnote').style.display='none';
+    document.getElementById('aeroB').style.display='';
+    document.getElementById('slotB').style.display='none';
+    document.getElementById('posB').style.display='';
+  } else if(isSingle || isDual){
+    // Side slot: Port B always listed here — its own ON/OFF is what adds the
+    // second port. OFF = one port (Port A folds across the back), ON = mirrored pair.
+    pcB.style.display=''; pcB.style.opacity=''; pcB.style.pointerEvents='';
+    document.getElementById('pbB').style.display='none';
+    document.getElementById('slotBnote').style.display='';
+    st('slotBnote', S.Bon?'Mirrors Port A settings':'Off — Port A runs as a single port');
+  } else {
+    // Bottom: hide Port B
+    pcB.style.display='none';
+  }
+
+  // Bottom slot extras
+  document.getElementById('bswRow').style.display = isBottom ? '' : 'none';
+  if(isBottom){
+    const fullW = Math.max(2, S.W - 4*S.T);
+    S.S1BW=fullW; S.S1BH=0;
+    const rEl=document.getElementById('rS1BW');
+    if(rEl){ rEl.max=(S.W-4*S.T).toFixed(2); rEl.value=fullW.toFixed(2); }
+    st('pAn','Bottom Slot Port');
+    st('lS1Hlabel','Width');
+  } else if(isAero){
+    S.S1BW=0; S.S1BH=0;
+    st('pAn','Aero Port A'); st('pBn','Aero Port B');
+  } else {
+    S.S1BW=0; S.S1BH=0;
+    st('pAn', l==='center'?'Center Slot Port':(isDual?'Slot Port A':'Slot Port'));
+    st('pBn','Slot Port B');
+    st('lS1Hlabel','Height');
+  }
+
+  go();
+}
+window.setLayout=setLayout;
+
+function setSubCount(n){
+  S.subCount=n;
+  for(let i=1;i<=6;i++) document.getElementById('ns-'+i).classList.toggle('on',i===n);
+  go();
+}
+window.setSubCount=setSubCount;
+
+function setMount(m){
+  S.mount=m;
+  ['front','top'].forEach(x=>{ const el=document.getElementById('mnt-'+x); if(el) el.classList.toggle('on',x===m); });
+  go();
+}
+window.setMount=setMount;
+
+function togPort(w){
+  const key=w==='A'?'Aon':'Bon';
+  S[key]=!S[key];
+  const btn=document.getElementById('et'+w);
+  const body=document.getElementById('pb'+w);
+  btn.textContent=S[key]?'ON':'OFF';
+  btn.classList.toggle('on',S[key]);
+  body.classList.toggle('off',!S[key]);
+  // On a side-slot ported box, Port B's switch adds/removes the second port
+  if(w==='B' && S.encl!=='bp4' && S.ptype==='slot'
+     && (S.layout==='dual' || S.layout==='dualboth')){
+    setLayout(S.Bon?'dualboth':'dual');    // re-lays out and calls go()
+    return;
+  }
+  go();
+}
+window.togPort=togPort;
+
+function switchTab(n){
+  const names=['bp','box','ports','sub','cuts'];   // must match the tab button order
+  document.querySelectorAll('.stab').forEach((b,i)=>b.classList.toggle('on',names[i]===n));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('tab-'+n).classList.add('on');
+  document.getElementById('scontent').scrollTop=0;
+  if(n==='sub')setTimeout(()=>{const ac=calcAc();drawFreq(ac.Fb,ac.nFt);},20);
+  if(n==='cuts')setTimeout(buildCutSheet,20);
+}
+window.switchTab=switchTab;
+
+// ── DOUBLE BAFFLE ─────────────────────────────────────────────────────────────
+function setDoubleBaffle(on){
+  S.doubleBaffle=on;
+  document.getElementById('db-off').classList.toggle('on',!on);
+  document.getElementById('db-on').classList.toggle('on', on);
+  document.getElementById('dbInfo').style.display=on?'':'none';
+  go();
+}
+window.setDoubleBaffle=setDoubleBaffle;
+
+// ── CUT SHEET ─────────────────────────────────────────────────────────────────
+function buildCutSheet(){
+  const {W,H,D,T,mount,doubleBaffle,ptype,Aon,Bon,SD,layout} = S;
+
+  // Format a number to a clean fraction-friendly string
+  function fmt(v){
+    v = parseFloat(v);
+    const whole = Math.floor(v);
+    const frac  = v - whole;
+    if(frac < 0.001)  return whole + '"';
+    if(Math.abs(frac - 0.125) < 0.001) return whole + ' 1/8"';
+    if(Math.abs(frac - 0.25)  < 0.001) return whole + ' 1/4"';
+    if(Math.abs(frac - 0.375) < 0.001) return whole + ' 3/8"';
+    if(Math.abs(frac - 0.5)   < 0.001) return whole + ' 1/2"';
+    if(Math.abs(frac - 0.625) < 0.001) return whole + ' 5/8"';
+    if(Math.abs(frac - 0.75)  < 0.001) return whole + ' 3/4"';
+    if(Math.abs(frac - 0.875) < 0.001) return whole + ' 7/8"';
+    return v.toFixed(3).replace(/0+$/,'') + '"';
+  }
+
+  document.getElementById('csT').textContent = fmt(T);
+
+  // ── BOX PANELS (top/bottom-cap construction) ──────────────────────────────
+  // Top & Bottom: W × D — FULL footprint, they cap everything
+  // Sides:        (D − T) × (H − 2T) — butt against back panel, run flush to
+  //               the front face. ALWAYS cut 2 identical, ported or not.
+  // Back:         W × (H − 2T) — full width, fits between top & bottom
+  // Front:        sits BETWEEN the side walls: (W − 2T) wide, minus each open
+  //               slot port's opening width. Only the front panel is ever "odd".
+  // Double baffle laminates a 2nd layer on the OUTSIDE, so wall height never changes
+  const wallH = H - 2*T;
+
+  const swOpen    = S.S1W;
+  const sideSlots = S.encl==='std';   // sealed has no ports; bandpass vents out the front
+  const openLeft  = sideSlots && ptype==='slot' && ((layout==='dual' && Aon) || (layout==='dualboth' && Aon));
+  const openRight = sideSlots && ptype==='slot' && (layout==='dualboth' && Bon);
+  const nOpen     = (openLeft?1:0) + (openRight?1:0);
+  const frontW    = Math.max(0.01, W - 2*T - nOpen*swOpen);
+
+  // Which panel gets doubled — the mounting face panel
+  const frontQty = (doubleBaffle && mount==='front') ? 2 : 1;
+  const topQty   = (doubleBaffle && mount==='top')   ? 2 : 1;
+  const centerCut = sideSlots && ptype==='slot' && layout==='center' && Aon;
+  let frontNote  = nOpen===0 ? 'Sits between the side walls'
+                 : nOpen===1 ? `Sits between the side walls · −${fmt(swOpen)} for ${openLeft?'left':'right'} port opening`
+                 :             `Sits between the side walls · −${fmt(2*swOpen)} for both port openings`;
+  if(doubleBaffle && mount==='front') frontNote = 'Double layer — CUT 2 identical pieces · ' + frontNote;
+  const topNote   = doubleBaffle && mount==='top'   ? 'Double layer — CUT 2 identical pieces · Full footprint' : 'Full footprint — caps the walls';
+
+  // Center slot: the front is two identical panels with the port gap between them
+  const frontPiece = centerCut
+    ? { name:'Front Panels',
+        note:(doubleBaffle&&mount==='front'?'Double layer — cut 4 total (2 per side) · ':'Cut 2 identical · ')
+          +`the ${fmt(swOpen)} port gap sits between them, centered`,
+        pw: Math.max(0.01,(W-2*T-swOpen)/2), ph: wallH, qty: 2*frontQty }
+    : { name:'Front Panel',  note: frontNote,  pw: frontW, ph: wallH, qty: frontQty };
+
+  const pieces = [
+    { name:'Top Panel',    note: topNote,    pw: W,      ph: D,     qty: topQty },
+    { name:'Bottom Panel', note:'Full footprint — caps the walls', pw: W, ph: D, qty: 1 },
+    { name:'Side Panels',  note:'Cut 2 identical — flush to front, butt against back panel', pw: D - T, ph: wallH, qty: 2 },
+    { name:'Back Panel',   note:'Full width — fits between top & bottom', pw: W, ph: wallH, qty: 1 },
+    frontPiece,
+  ];
+
+  // ── SLOT PORT WALLS ───────────────────────────────────────────────────────
+  const portPieces = [];
+  const bpc = bpCalc();
+  if(bpc){
+    const bg=bpc.bg;
+    pieces.push({ name:'Sub Baffle (Divider)',
+      note:`DOUBLE LAYER — cut 2 identical, laminate to ${fmt(bg.DT)} · sits ${fmt(bg.rearD)} from the inside face of the back panel · drivers mount here`,
+      pw: bg.divW, ph: bg.divH, qty: 2 });
+    const fp=pieces.find(p=>p.name==='Front Panel');
+    if(bpc.isAero){
+      const holes=[];
+      if(bpc.pA) holes.push(`Ø${fmt(S.P1D)} (aero A)`);
+      if(bpc.pB) holes.push(`Ø${fmt(S.P2D)} (aero B)`);
+      if(fp&&holes.length) fp.note += ` · Cut port hole${holes.length>1?'s':''}: ${holes.join(' and ')}`;
+    }else if(bpc.pA){
+      const pw=bpc.pA.pw, leg1=bpc.pA.leg1, leg2=bpc.pA.leg2;
+      if(fp) fp.note += ` · Cut port opening ${fmt(pw)} × ${fmt(S.S1W)} (W×H) at the bottom`;
+      portPieces.push({ name:'Front Chamber Port — Lid Wall',
+        note:`Port width + 2× wood · Opening gap: ${fmt(S.S1W)}`, pw: leg1, ph: pw+2*T, qty: 1 });
+      portPieces.push({ name:'Front Chamber Port — Side Walls',
+        note:`Under the lid edges · Height: ${fmt(S.S1W)}`, pw: leg1, ph: S.S1W, qty: 2 });
+      if(leg2>0.1){
+        portPieces.push({ name:'Front Chamber Port — Fold Wall',
+          note:`Vertical leg — turns the duct upward`, pw: leg2, ph: pw+2*T, qty: 1 });
+        portPieces.push({ name:'Front Chamber Port — Fold Side Walls',
+          note:`Under the fold leg`, pw: leg2, ph: S.S1W, qty: 2 });
+      }
+    }
+  } else if(S.encl!=='sealed' && ptype === 'slot'){
+    const slotH = H - 2*T;   // port walls fit between top & bottom panels
+    const sw = S.S1W;
+    const sl = S.S1L;
+    const WT = T;
+
+    if(layout === 'back'){
+      // Bottom slot
+      const interiorW = W - 2*T;
+      const maxPW = W - 4*T;   // port + its two side walls must fit inside the interior
+      const portW = (S.S1BW > 0) ? Math.min(S.S1BW, maxPW) : maxPW;
+      const lidW  = portW + 2*T;
+      const maxLeg = (D - T) - (T + sw);
+      const leg1   = Math.min(sl, maxLeg);
+      portPieces.push({ name:'Bottom Slot — Lid Wall', note:`Port width + 2× wood · Opening gap: ${fmt(sw)}`, pw: leg1, ph: lidW, qty: 1 });
+      if(portW < interiorW - 0.01){
+        portPieces.push({ name:'Bottom Slot — Side Walls', note:`Under lid edges · Height: ${fmt(sw)}`, pw: leg1, ph: sw, qty: 2 });
+      }
+      if(sl > maxLeg){
+        const leg2 = Math.min(sl - maxLeg, maxLeg);
+        portPieces.push({ name:'Bottom Slot — Back Wall', note:`Vertical leg`, pw: leg2, ph: lidW, qty: 1 });
+        if(portW < interiorW - 0.01){
+          portPieces.push({ name:'Bottom Slot — Back Side Walls', note:`Under back leg`, pw: leg2, ph: sw, qty: 2 });
+        }
+      }
+
+    } else if(layout === 'center'){
+      // Center tunnel — two identical walls from the front baffle toward the back
+      if(Aon){
+        const maxLen=Math.max(1,(D-2*T)-sw);
+        const len=Math.min(sl,maxLen);
+        portPieces.push({ name:'Center Port Walls',
+          note:`Cut 2 identical — butt against the front panels, ${fmt(sw)} apart, centered · stop ${fmt((D-2*T)-len)} short of the back panel`,
+          pw: len, ph: slotH, qty: 2 });
+      }
+
+    } else if(layout === 'dual'){
+      // Single labyrinth — calculate actual leg lengths matching buildFrontSlot
+      if(Aon){
+        const iL = T, iR = W-T, iF = D-T, iB = T;
+        const backConnZ  = iB + sw + WT/2;
+        const depthMax   = iF - (iB + sw + WT);
+        const bConnWidth = (iR - sw - WT/2) - (iL + sw + WT/2) - WT; // back connector width (pass 0)
+        const rDepth     = iF - (backConnZ + WT/2) - sw; // right wall depth
+
+        let remaining = sl;
+        let pass = 0;
+        while(remaining > 0.01 && pass < 10){
+          const offset = pass * (WT + sw);
+          const leftX  = iL + sw + WT/2 + offset;
+          const rightX = iR - sw - WT/2 - offset;
+          if(leftX >= rightX - sw) break;
+
+          // Left wall
+          const lRun = Math.min(remaining, Math.max(0, depthMax));
+          if(lRun > 0.01){
+            portPieces.push({ name:`Pass ${pass+1} — Left Wall`, note:`Opening: ${fmt(sw)} · Height: ${fmt(slotH)}`, pw: lRun, ph: slotH, qty:1 });
+            remaining -= lRun; if(remaining <= 0.01) break;
+          }
+          // Back connector
+          const bMax = rightX - leftX - WT;
+          const bRun = Math.min(remaining, Math.max(0, bMax));
+          if(bRun > 0.01){
+            portPieces.push({ name:`Pass ${pass+1} — Back Connector`, note:`Height: ${fmt(slotH)}`, pw: bRun, ph: slotH, qty:1 });
+            remaining -= bRun; if(remaining <= 0.01) break;
+          }
+          // Right wall
+          const rMax = iF - (backConnZ + WT/2) - sw;
+          const rRun = Math.min(remaining, Math.max(0, rMax));
+          if(rRun > 0.01){
+            portPieces.push({ name:`Pass ${pass+1} — Right Wall`, note:`Height: ${fmt(slotH)}`, pw: rRun, ph: slotH, qty:1 });
+            remaining -= rRun; if(remaining <= 0.01) break;
+          }
+          // Front connector
+          const nextLeftFace = iL + sw + offset + WT + sw;
+          const fMax = rightX - WT/2 - nextLeftFace;
+          const fRun = Math.min(remaining, Math.max(0, fMax));
+          if(fRun > 0.01){
+            portPieces.push({ name:`Pass ${pass+1} — Front Connector`, note:`Height: ${fmt(slotH)}`, pw: fRun, ph: slotH, qty:1 });
+            remaining -= fRun; if(remaining <= 0.01) break;
+          }
+          pass++;
+        }
+      }
+
+    } else if(layout === 'dualboth'){
+      // Dual mirrored — A left, B right, both same dimensions
+      const maxLeg = D - 2*T - sw;
+      const leg1   = Math.min(sl, maxLeg);
+      if(Aon){
+        portPieces.push({ name:'Slot Port A — Wall', note:`Opening: ${fmt(sw)} · Height: ${fmt(slotH)}`, pw: leg1, ph: slotH, qty:1 });
+        if(sl > maxLeg){
+          const leg2 = Math.min(sl - maxLeg, maxLeg);
+          portPieces.push({ name:'Slot Port A — Return Wall', note:`Fold-back leg`, pw: leg2, ph: slotH, qty:1 });
+        }
+      }
+      if(Bon){
+        portPieces.push({ name:'Slot Port B — Wall', note:`Mirrors A · Opening: ${fmt(sw)} · Height: ${fmt(slotH)}`, pw: leg1, ph: slotH, qty:1 });
+        if(sl > maxLeg){
+          const leg2 = Math.min(sl - maxLeg, maxLeg);
+          portPieces.push({ name:'Slot Port B — Return Wall', note:`Fold-back leg`, pw: leg2, ph: slotH, qty:1 });
+        }
+      }
+    }
+  }
+
+  // ── TOTALS ────────────────────────────────────────────────────────────────
+  let totalArea = 0;
+  [...pieces, ...portPieces].forEach(p => { totalArea += p.pw * p.ph * p.qty; });
+  const totalFt2 = totalArea / 144;
+  const sheets   = Math.ceil(totalFt2 / 32);
+  const cutoutDia = (SD * 0.92).toFixed(2);
+
+  // ── RENDER PANEL CARDS ────────────────────────────────────────────────────
+  function makeCard(p){
+    return `<div class="cut-piece">
+      <div><div class="cut-name">${p.name}</div><div class="cut-sub">${p.note}</div></div>
+      <div class="cut-right"><div class="cut-dim">${fmt(p.pw)} × ${fmt(p.ph)}</div><div class="cut-qty">Qty: ${p.qty}</div></div>
+    </div>`;
+  }
+
+  const cl = document.getElementById('cutList');
+  cl.innerHTML = pieces.map(makeCard).join('');
+
+  const portWrap = document.getElementById('portCutsWrap');
+  const portEl   = document.getElementById('portCuts');
+  if(portPieces.length > 0){
+    portWrap.style.display = '';
+    portEl.innerHTML = portPieces.map(makeCard).join('');
+  } else {
+    portWrap.style.display = 'none';
+  }
+
+  // ── SUMMARY FIELDS ────────────────────────────────────────────────────────
+  document.getElementById('csCutout').innerHTML = `${cutoutDia}<span class="mu">in</span>`;
+  document.getElementById('csBaffle').textContent =
+    bpc ? '2× Double' : (doubleBaffle ? '2× Double' : '1× Single');
+  const csSubCt = document.getElementById('csSubCt');
+  const csSubCt2 = document.getElementById('csSubCt2');
+  if(csSubCt) csSubCt.textContent = S.subCount + '× sub' + (S.subCount>1?'s':'');
+  if(csSubCt2) csSubCt2.textContent = S.subCount + ' hole' + (S.subCount>1?'s':'');
+  document.getElementById('csBdFt').innerHTML   = `${totalFt2.toFixed(2)}<span class="mu"> ft²</span>`;
+  document.getElementById('csSheets').textContent = `${sheets} × 4'×8'`;
+  document.getElementById('dbThick').textContent  = `${fmt(T)} + ${fmt(T)} = ${fmt(T*2)}`;
+}
+window.buildCutSheet = buildCutSheet;
+
+function printCuts(){
+  window.print();
+}
+window.printCuts=printCuts;
+
+// ── TOUCH STEPPERS — wrap every slider with − / + fine-adjust buttons ────────
+document.querySelectorAll('.sl input[type=range]').forEach(r=>{
+  const wrap=document.createElement('div');wrap.className='slwrap';
+  r.parentNode.insertBefore(wrap,r);
+  const mk=(txt,dir)=>{
+    const b=document.createElement('button');b.type='button';b.className='stepb';b.textContent=txt;
+    b.addEventListener('click',()=>{
+      const step=+r.step||1;
+      let v=+r.value+dir*step;
+      v=Math.min(+r.max,Math.max(+r.min,v));
+      v=Math.round(v/step)*step;
+      r.value=v;
+      r.dispatchEvent(new Event('input',{bubbles:true}));
+    });
+    return b;
+  };
+  wrap.appendChild(mk('\u2212',-1));wrap.appendChild(r);wrap.appendChild(mk('+',1));
+});
+
+// ── CAMERA ────────────────────────────────────────────────────────────────────
+let sph={theta:.5,phi:1.0,r:200};
+let panX=0,panY=0;
+let md={dn:false,btn:0,lx:0,ly:0};
+let curView='persp';
+
+function camUpdate(){
+  const{theta,phi,r}=sph;
+  camera.position.set(
+    panX+r*Math.sin(phi)*Math.sin(theta),
+    panY+r*Math.cos(phi),
+    r*Math.sin(phi)*Math.cos(theta)
+  );
+  camera.lookAt(panX,panY,0);
+}
+
+const cc=document.getElementById('c3d');
+cc.addEventListener('mousedown',e=>{md.dn=true;md.btn=e.button;md.lx=e.clientX;md.ly=e.clientY;e.preventDefault();});
+window.addEventListener('mouseup',()=>md.dn=false);
+window.addEventListener('mousemove',e=>{
+  if(!md.dn||curView!=='persp')return;
+  const dx=e.clientX-md.lx,dy=e.clientY-md.ly;
+  md.lx=e.clientX;md.ly=e.clientY;
+  if(md.btn===2||e.shiftKey){panX-=dx*sph.r*.001;panY+=dy*sph.r*.001;}
+  else{sph.theta-=dx*.007;sph.phi=Math.max(.03,Math.min(Math.PI*.49,sph.phi-dy*.007));}
+  camUpdate();
+});
+cc.addEventListener('contextmenu',e=>e.preventDefault());
+cc.addEventListener('wheel',e=>{sph.r=Math.max(20,Math.min(1000,sph.r+e.deltaY*.25));camUpdate();e.preventDefault();},{passive:false});
+
+let lt=[];
+cc.addEventListener('touchstart',e=>{lt=Array.from(e.touches);e.preventDefault();},{passive:false});
+cc.addEventListener('touchmove',e=>{
+  if(curView!=='persp')return;
+  const t=Array.from(e.touches);
+  if(t.length===1&&lt.length===1){
+    sph.theta-=(t[0].clientX-lt[0].clientX)*.01;
+    sph.phi=Math.max(.03,Math.min(Math.PI*.49,sph.phi-(t[0].clientY-lt[0].clientY)*.01));
+    camUpdate();
+  }else if(t.length===2&&lt.length===2){
+    const pd=Math.hypot(lt[0].clientX-lt[1].clientX,lt[0].clientY-lt[1].clientY);
+    const cd=Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+    sph.r=Math.max(20,Math.min(1000,sph.r-(cd-pd)*.5));camUpdate();
+  }
+  lt=t;e.preventDefault();
+},{passive:false});
+
+function setView(v){
+  curView=v;
+  document.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('on'));
+  const el=document.getElementById('b'+v.charAt(0).toUpperCase()+v.slice(1));
+  if(el)el.classList.add('on');
+  const M=Math.max(S.W,S.H,S.D);
+  const K=M*((camera.aspect||1)<0.9?4.4:3);   // portrait needs more distance
+  panX=0;panY=S.H*.5;
+  if(v==='front'){camera.position.set(0,panY,K);camera.lookAt(0,panY,0);}
+  else if(v==='back'){camera.position.set(0,panY,-K);camera.lookAt(0,panY,0);}
+  else if(v==='top'){camera.position.set(0,K*1.15,.01);camera.lookAt(0,0,0);}
+  else if(v==='side'){camera.position.set(K,panY,0);camera.lookAt(0,panY,0);}
+  else resetCam();
+}
+window.setView=setView;
+
+function resetCam(){
+  curView='persp';
+  document.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('bPersp').classList.add('on');
+  const M=Math.max(S.W,S.H,S.D);
+  sph={theta:.5,phi:1.0,r:M*((camera.aspect||1)<0.9?6:4.5)};
+  panX=0;panY=S.H*.45;
+  camUpdate();
+}
+window.resetCam=resetCam;
+
+// ── FREQ ──────────────────────────────────────────────────────────────────────
+// ── BOX MODEL — small-signal Thiele/Small simulation (WinISD-style) ───────────
+// Vented: 4th-order high-pass with driver (Qts) and leakage (Ql) losses.
+// Sealed: 2nd-order high-pass from the sealed alignment (Fc, Qtc).
+// Returns null when the driver's T/S parameters haven't been entered.
+const RHO=1.18, CSND=343, QL_BOX=7, QMS_ASSUMED=5;
+let graphMode='spl', hoverF=0;
+
+function boxModel(ac){
+  const Fs=S.Fs, Qts=S.Qts, VasL=S.Vas;
+  if(!(Fs>0&&Qts>0&&VasL>0)) return null;
+
+  const n    = Math.max(1,S.subCount|0);
+  const Vb   = Math.max(0.05,ac.nFt)*0.0283168;            // net internal volume, m³
+  const Sd   = Math.PI*Math.pow(S.SD*0.82/2*0.0254,2);     // one cone area, m²
+  const Ap   = (ac.a1+ac.a2)*6.4516e-4;                    // total port area, m²
+  const vented = ac.Fb>1 && Ap>1e-6;
+  const alpha= (VasL/1000)*n/Vb;                           // compliance ratio Vas/Vb
+  const ws   = 2*Math.PI*Fs;
+  const wb   = vented ? 2*Math.PI*ac.Fb : 0;
+
+  // Qes inferred from Qts (Qms is not one of our stored parameters)
+  const Qes  = Qts*QMS_ASSUMED/Math.max(0.1,QMS_ASSUMED-Qts);
+  // Reference efficiency → 1W/1m half-space sensitivity
+  const eta0 = (4*Math.PI*Math.PI/Math.pow(CSND,3))*Math.pow(Fs,3)*(VasL/1000)/Qes;
+  const spl1w= 112.02+10*Math.log10(Math.max(1e-12,eta0));
+  const Pd   = Math.max(1,S.RMS)/n;                        // power per driver (RMS is total)
+
+  // Unloaded (DC) excursion of one driver at Pd watts
+  const Cms  = (VasL/1000)/(RHO*CSND*CSND*Sd*Sd);
+  const xdc  = Math.sqrt(Cms*Pd/(Qes*ws));                 // metres
+
+  if(ac.bp) return bpModel(ac,{n,Sd,ws,xdc,VasL,Qts});
+
+  // Denominator coefficients
+  let a3,a2,a1,a0,wc,Qtc;
+  if(vented){
+    a3 = ws/Qts + wb/QL_BOX;
+    a2 = ws*ws + wb*wb + alpha*ws*ws + ws*wb/(Qts*QL_BOX);
+    a1 = ws*wb*wb/Qts + wb*ws*ws/QL_BOX;
+    a0 = ws*ws*wb*wb;
+  }else{
+    wc  = ws*Math.sqrt(1+alpha);
+    Qtc = Qts*Math.sqrt(1+alpha);
+  }
+  const den=w=>{                                           // [Re,Im] of denominator at s=jw
+    if(vented){ const w2=w*w; return [w2*w2-a2*w2+a0, -a3*w2*w+a1*w]; }
+    return [wc*wc-w*w, wc*w/Qtc];
+  };
+  const dmag=w=>{ const d=den(w); return Math.max(1e-30,Math.hypot(d[0],d[1])); };
+  const gain=w=>(vented?Math.pow(w,4):w*w)/dmag(w);
+
+  const splAt=f=>{ const w=2*Math.PI*f;
+    return spl1w+10*Math.log10(Pd)+20*Math.log10(n)+20*Math.log10(Math.max(1e-9,gain(w))); };
+  const excAt=f=>{ const w=2*Math.PI*f, m=dmag(w);         // mm, one driver
+    return (vented ? xdc*ws*ws*Math.abs(wb*wb-w*w)/m
+                   : (xdc/(1+alpha))*wc*wc/m)*1000; };
+  const velAt=f=>{ if(!vented) return 0;                   // m/s through the port
+    const w=2*Math.PI*f;
+    return n*Sd*w*xdc*ws*ws*wb*wb/dmag(w)/Ap; };
+
+  return {vented,alpha,Fb:ac.Fb,Sd,Ap,n,spl:splAt,exc:excAt,vel:velAt};
+}
+
+// ── 4TH ORDER BANDPASS RESPONSE ───────────────────────────────────────────────
+// Solved as an acoustic circuit at each frequency. The driver works into a
+// sealed rear chamber and a ported front chamber; only the port radiates, which
+// is what turns the response into a bandpass with 12 dB/oct skirts on both sides.
+const QPORT=12;                       // port / chamber loss Q
+const cAdd=(a,b)=>[a[0]+b[0],a[1]+b[1]];
+const cMul=(a,b)=>[a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0]];
+const cDiv=(a,b)=>{const d=b[0]*b[0]+b[1]*b[1]||1e-30;
+  return [(a[0]*b[0]+a[1]*b[1])/d, (a[1]*b[0]-a[0]*b[1])/d];};
+const cAbs=a=>Math.hypot(a[0],a[1]);
+const cPar=(a,b)=>cDiv(cMul(a,b),cAdd(a,b));
+
+function bpModel(ac,P){
+  const {n,Sd,ws,xdc,VasL,Qts}=P;
+  const bp=ac.bp, rho=RHO, c=CSND;
+
+  // Composite driver — n identical drivers sharing the same chambers
+  const Cas=(VasL/1000)/(rho*c*c);
+  const CasC=Cas*n, MasC=1/(ws*ws*CasC), RasC=ws*MasC/Qts, SdC=Sd*n;
+  const pg=xdc*Sd/Cas;                                    // drive pressure, Pa
+
+  const Vr=Math.max(1e-4,bp.rearIn *1.6387e-5);
+  const Vf=Math.max(1e-4,bp.frontIn*1.6387e-5);
+  const Car=Vr/(rho*c*c), Caf=Vf/(rho*c*c);
+
+  let prt=null;
+  if(bp.a>0 && bp.LeffM>0){
+    const Ap=bp.a*6.4516e-4;
+    const Map=rho*bp.LeffM/Ap;
+    prt={Ap,Map,Rap:(1/Math.sqrt(Map*Caf))*Map/QPORT};
+  }
+  const solve=f=>{
+    const w=2*Math.PI*Math.max(0.1,f);
+    const Zd=[RasC, w*MasC - 1/(w*CasC)];
+    const Zr=[0,-1/(w*Car)];                              // sealed rear chamber
+    const Zf=prt?cPar([0,-1/(w*Caf)],[prt.Rap,w*prt.Map]):[0,-1/(w*Caf)];
+    const Ud=cDiv([pg,0], cAdd(cAdd(Zd,Zf),Zr));
+    const Up=prt?cDiv(cMul(Ud,Zf),[prt.Rap,w*prt.Map]):[0,0];
+    return {w,Ud,Up};
+  };
+  return {vented:true, bandpass:true, mode:'bp4', alpha:0,
+    Fb:bp.Fb, Sd:SdC, Ap:(prt?prt.Ap:0), n,
+    spl:f=>{ const r=solve(f);
+      return 20*Math.log10(Math.max(1e-9,(rho*r.w*cAbs(r.Up)/(2*Math.PI))/2e-5)); },
+    exc:f=>{ const r=solve(f); return cAbs(r.Ud)/(r.w*SdC)*1000; },
+    vel:f=>{ const r=solve(f); return prt?cAbs(r.Up)/prt.Ap:0; }};
+}
+
+function setGraph(m){
+  graphMode=m;
+  ['spl','exc','vel'].forEach(x=>{
+    const e=document.getElementById('gr-'+x); if(e) e.classList.toggle('on',x===m);
+  });
+  const ac=calcAc(); drawFreq(ac.Fb,ac.nFt);
+}
+window.setGraph=setGraph;
+
+const GRAPHS={
+  spl:{label:'SPL',      unit:'dB',  color:'#38bdf8',
+       desc:'How loud the box plays at each frequency'},
+  exc:{label:'Excursion',unit:'mm',  color:'#f97316',
+       desc:'How far the cone moves — stay under the red Xmax line'},
+  vel:{label:'Port Vel', unit:'m/s', color:'#22c55e',
+       desc:'Air speed in the port — above the red line it chuffs'}
+};
+const F_LO=10, F_HI=200;
+
+function drawFreq(Fb,Vb){
+  const fc=document.getElementById('freqC');
+  if(!fc||!fc.offsetWidth) return;
+  const CH=210, dpr=devicePixelRatio||1;
+  fc.width=fc.offsetWidth*dpr; fc.height=CH*dpr;
+  const ctx=fc.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  const W=fc.offsetWidth, H=CH;
+  const padL=38,padR=10,padT=12,padB=20;
+  const xL=padL,xR=W-padR,yT=padT,yB=H-padB;
+
+  ctx.fillStyle='#0b0c0f'; ctx.fillRect(0,0,W,H);
+
+  const ac=calcAc();
+  const M=boxModel(ac);
+  const gdef=GRAPHS[graphMode];
+  const lg=Math.log10(F_HI)-Math.log10(F_LO);
+  const fx=f=>xL+(Math.log10(f)-Math.log10(F_LO))/lg*(xR-xL);
+
+  // Sample the selected curve
+  const N=280, pts=[];
+  let vMin=Infinity, vMax=-Infinity;
+  if(M){
+    for(let i=0;i<=N;i++){
+      const f=F_LO*Math.pow(F_HI/F_LO,i/N);
+      let v = graphMode==='spl'?M.spl(f) : graphMode==='exc'?M.exc(f) : M.vel(f);
+      if(!isFinite(v)) v=0;
+      pts.push([f,v]);
+      if(v<vMin)vMin=v; if(v>vMax)vMax=v;
+    }
+  }
+
+  // Y-axis range and reference/limit line per graph type
+  let yLo,yHi,limit=null,limitLbl='';
+  if(!M){ yLo=0; yHi=1; }
+  else if(graphMode==='spl'){
+    yHi=Math.ceil((vMax+3)/5)*5; yLo=yHi-40;
+  }else if(graphMode==='exc'){
+    limit=S.Xmax||0; limitLbl='Xmax';
+    yLo=0; yHi=Math.max(vMax*1.1, limit*1.4, 1);
+  }else{
+    limit=17; limitLbl='chuff';
+    yLo=0; yHi=Math.max(vMax*1.1, 22);
+  }
+  const yv=v=>yB-(v-yLo)/(yHi-yLo||1)*(yB-yT);
+
+  // Grid
+  ctx.strokeStyle='#1c1f28'; ctx.lineWidth=1;
+  const fTicks=[10,15,20,25,30,40,50,60,80,100,150,200];
+  fTicks.forEach(f=>{ const x=fx(f);
+    ctx.beginPath(); ctx.moveTo(x,yT); ctx.lineTo(x,yB); ctx.stroke(); });
+  const steps=5;
+  ctx.fillStyle='#4b5060'; ctx.font='8px JetBrains Mono'; ctx.textAlign='right';
+  for(let i=0;i<=steps;i++){
+    const v=yLo+(yHi-yLo)*i/steps, y=yv(v);
+    ctx.beginPath(); ctx.moveTo(xL,y); ctx.lineTo(xR,y); ctx.stroke();
+    const dec=(yHi-yLo)<6?1:0;
+    ctx.fillText(v.toFixed(dec),xL-4,y+3);
+  }
+  ctx.textAlign='left';
+  ctx.fillStyle='#4b5060';
+  [10,20,30,50,80,100,200].forEach(f=>{
+    const x=fx(f); ctx.fillText(f, Math.min(x+2,xR-16), H-6);
+  });
+  ctx.fillStyle='#8890a0'; ctx.font='8px JetBrains Mono';
+  ctx.fillText(gdef.label+' ('+gdef.unit+')', xL+2, yT-3);
+
+  if(!M){
+    ctx.fillStyle='#4b5060'; ctx.font='10px JetBrains Mono'; ctx.textAlign='center';
+    ctx.fillText('Enter Fs, Qts and Vas to simulate',(xL+xR)/2,(yT+yB)/2-4);
+    ctx.font='9px JetBrains Mono';
+    ctx.fillText('(pick a driver from the library above)',(xL+xR)/2,(yT+yB)/2+10);
+    ctx.textAlign='left';
+    st('mF3','—'); st('mPkSPL','—'); st('mPkExc','—');
+    return;
+  }
+
+  // Limit line (Xmax / port chuffing threshold)
+  if(limit>0 && limit<yHi){
+    const y=yv(limit);
+    ctx.strokeStyle='rgba(239,68,68,.75)'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(xL,y); ctx.lineTo(xR,y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#ef4444'; ctx.font='8px JetBrains Mono';
+    ctx.fillText(limitLbl,xL+3,y-3);
+  }
+
+  // Tuning marker
+  if(M.vented && ac.Fb>=F_LO && ac.Fb<=F_HI){
+    const x=fx(ac.Fb);
+    ctx.strokeStyle='rgba(249,115,22,.55)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(x,yT); ctx.lineTo(x,yB); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#f97316'; ctx.font='bold 9px JetBrains Mono';
+    ctx.fillText('Fb',x+3,yT+9);
+  }
+
+  // Curve — clipped to the plot area
+  ctx.save();
+  ctx.beginPath(); ctx.rect(xL,yT,xR-xL,yB-yT); ctx.clip();
+  ctx.strokeStyle=gdef.color; ctx.lineWidth=2.2; ctx.beginPath();
+  pts.forEach((p,i)=>{ const x=fx(p[0]),y=yv(p[1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+  ctx.stroke();
+  ctx.restore();
+
+  // Touch/hover crosshair + readout
+  const hint=document.getElementById('grHint');
+  if(hoverF>=F_LO&&hoverF<=F_HI){
+    const x=fx(hoverF);
+    let v = graphMode==='spl'?M.spl(hoverF) : graphMode==='exc'?M.exc(hoverF) : M.vel(hoverF);
+    const y=yv(v);
+    ctx.strokeStyle='rgba(136,144,160,.5)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x,yT); ctx.lineTo(x,yB); ctx.stroke();
+    ctx.fillStyle=gdef.color;
+    ctx.beginPath(); ctx.arc(x,Math.max(yT,Math.min(yB,y)),3,0,7); ctx.fill();
+    if(hint) hint.innerHTML='<span style="color:var(--txt)">'+hoverF.toFixed(1)+' Hz</span> · '
+      +gdef.label+' <span style="color:'+gdef.color+'">'+v.toFixed(v>=100?0:2)+' '+gdef.unit+'</span>';
+  }else if(hint){
+    hint.innerHTML=gdef.desc+' <span style="color:var(--muted)">· drag to read values</span>';
+  }
+
+  // Summary stats
+  let pkSPL=-999,f3=0,pkExc=0;
+  for(let i=0;i<pts.length;i++){ const f=pts[i][0];
+    const s=M.spl(f); if(s>pkSPL)pkSPL=s;
+    const e=M.exc(f); if(e>pkExc)pkExc=e;
+  }
+  for(let i=pts.length-1;i>0;i--){                     // F3 = lowest −3dB crossing
+    if(M.spl(pts[i][0])>=pkSPL-3 && M.spl(pts[i-1][0])<pkSPL-3){ f3=pts[i][0]; break; }
+  }
+  st('mF3', f3?f3.toFixed(1):'—');
+  st('mPkSPL', pkSPL>-900?pkSPL.toFixed(1):'—');
+  const excEl=document.getElementById('mPkExc');
+  if(excEl){
+    const pct=S.Xmax>0?pkExc/S.Xmax*100:0;
+    excEl.innerHTML=pkExc.toFixed(1)+'<span class="mu">mm</span>'
+      +(S.Xmax>0?' <span class="'+vc(pct,100,130)+'" style="font-size:10px">'+pct.toFixed(0)+'%</span>':'');
+  }
+
+  // Attach pointer/touch handlers once
+  if(!fc.dataset.hooked){
+    fc.dataset.hooked='1';
+    const track=clientX=>{
+      const r=fc.getBoundingClientRect(), px=clientX-r.left;
+      hoverF=(px<padL||px>r.width-padR) ? 0
+           : F_LO*Math.pow(F_HI/F_LO,(px-padL)/(r.width-padL-padR));
+      const a=calcAc(); drawFreq(a.Fb,a.nFt);
+    };
+    const clear=()=>{ hoverF=0; const a=calcAc(); drawFreq(a.Fb,a.nFt); };
+    fc.addEventListener('mousemove',ev=>track(ev.clientX));
+    fc.addEventListener('mouseleave',clear);
+    fc.addEventListener('touchstart',ev=>{ track(ev.touches[0].clientX); ev.preventDefault(); },{passive:false});
+    fc.addEventListener('touchmove', ev=>{ track(ev.touches[0].clientX); ev.preventDefault(); },{passive:false});
+    fc.addEventListener('touchend',  clear);
+    fc.addEventListener('touchcancel',clear);
+  }
+}
+
+// ── RENDER LOOP ───────────────────────────────────────────────────────────────
+(function loop(){requestAnimationFrame(loop);renderer.render(scene,camera);})();
+
+// ── SUBWOOFER LIBRARY — saved drivers in localStorage ─────────────────────────
+const DRV_KEY='prokziDrivers';
+const DRV_FIELDS=['SD','SDisp','Xmax','RMS','Fs','Qts','Vas','Pe'];
+
+// Built-in driver database — manufacturer/published T/S specs.
+// Format per driver: [SD in, SDisp ft³, Xmax mm, RMS W, Fs Hz, Qts, Vas L]
+// SDisp is estimated (~) where the manufacturer doesn't publish driver displacement.
+const BUILT_IN_DRIVERS={
+'Skar Audio':{
+  'Skar IX-10':        [10,0.04, 7,  200, 40.0,0.47, 22.3],
+  'Skar IX-12':        [12,0.06, 7,  250, 35.1,0.62, 67.8],
+  'Skar SDR-10':       [10,0.04,13.5, 600, 39.0,0.58, 10.9],
+  'Skar SDR-12':       [12,0.04,14,  600, 32.0,0.50, 43.4],
+  'Skar SDR-15':       [15,0.07,13.5, 600, 29.0,0.67, 84.9],
+  'Skar DDX-10':       [10,0.06,15,  750, 35.8,0.38,  8.7],
+  'Skar DDX-12':       [12,0.08,15,  750, 34.2,0.37, 25.9],
+  'Skar DDX-15':       [15,0.10,15,  750, 33.6,0.39, 46.7],
+  'Skar EVL-10':       [10,0.10,23.5,1000, 44.0,0.59,  6.8],
+  'Skar EVL-12':       [12,0.15,24, 1250, 32.2,0.461,19.1],
+  'Skar EVL-15':       [15,0.18,23.5,1250, 35.0,0.63, 46.0],
+  'Skar EVL-18':       [18,0.25,24, 1250, 38.0,1.03, 78.0],
+  'Skar VXF-12':       [12,0.15,25, 1500, 32.1,0.32, 35.4],
+  'Skar VXF-15':       [15,0.18,30, 1500, 31.4,0.40, 47.7],
+  'Skar ZVX-12v2':     [12,0.15,29, 1500, 44.0,0.41, 24.4],
+  'Skar ZVX-15v2':     [15,0.17,29, 1500, 39.0,0.52, 58.9],
+  'Skar ZVX-18v2':     [18,0.20,29, 1600, 27.4,0.49,136.2]},
+'Sundown Audio':{
+  'Sundown E-10 v4':   [10,0.06,14,  500, 33.5,0.39, 18.8],
+  'Sundown E-12 v4':   [12,0.08,14,  500, 28.4,0.49, 54.3],
+  'Sundown E-15 v4':   [15,0.11,14,  500, 30.5,0.671,103.0],
+  'Sundown SA-10 v3':  [10,0.08,22, 1250, 36.0,0.421, 8.5],
+  'Sundown SA-12 v3':  [12,0.10,22, 1250, 35.0,0.428,22.2],
+  'Sundown SA-15 v3':  [15,0.13,22, 1250, 35.0,0.424,54.7],
+  'Sundown U-12':      [12,0.12,30, 1500, 40.0,0.34, 12.3],
+  'Sundown U-15':      [15,0.16,30, 1500, 34.9,0.35, 63.9],
+  'Sundown X-10 v3':   [10,0.10,30, 2000, 40.2,0.445, 9.4],
+  'Sundown X-12 v3':   [12,0.15,30, 2000, 37.2,0.454,17.1],
+  'Sundown X-15 v3':   [15,0.18,30, 2000, 31.4,0.468,45.9],
+  'Sundown Zv6-12':    [12,0.16,35, 2500, 33.0,0.46, 21.1],
+  'Sundown Zv6-15':    [15,0.20,35, 2500, 28.8,0.346,46.7],
+  'Sundown Zv6-18':    [18,0.26,35, 2500, 26.6,0.449,97.0]},
+'Rockford Fosgate':{
+  'RF Prime R2D4-10':  [10,0.04, 6.5, 250, 34.9,0.53, 38.4],
+  'RF Prime R2D4-12':  [12,0.05, 6.5, 250, 34.9,0.60, 68.8],
+  'RF Punch P2D4-10':  [10,0.05,10,   300, 30.8,0.57, 35.4],
+  'RF Punch P2D4-12':  [12,0.07,13.3, 400, 27.2,0.54, 81.5],
+  'RF Punch P2D4-15':  [15,0.09,12.2, 400, 20.9,0.66,219.6],
+  'RF Punch P3D4-10':  [10,0.07,15.9, 500, 28.0,0.56, 27.0],
+  'RF Punch P3D4-12':  [12,0.09,14,   600, 27.7,0.49, 57.7],
+  'RF Punch P3D4-15':  [15,0.12,15.9, 600, 22.4,0.57,155.8],
+  'RF Power T1D410':   [10,0.08,16,   600, 36.0,0.65, 15.7],
+  'RF Power T1D412':   [12,0.11,16,   800, 29.2,0.61, 55.8],
+  'RF Power T1D415':   [15,0.14,16.4,1000, 27.0,0.51,102.0]},
+'Kicker':{
+  'Kicker CompC 10':   [10,0.05,13.2, 300, 35.5,0.59, 37.9],
+  'Kicker CompC 12':   [12,0.06,13.2, 300, 31.6,0.73, 75.9],
+  'Kicker CompC 15':   [15,0.10,16.1, 600, 25.6,0.53,157.8],
+  'Kicker CompR 10':   [10,0.06,14,   400, 31.3,0.482,30.1],
+  'Kicker CompR 12':   [12,0.07,14,   500, 30.9,0.564,58.3],
+  'Kicker L7S 10':     [10,0.08,19.3, 600, 32.1,0.46, 31.7],
+  'Kicker L7S 12':     [12,0.11,19.3, 750, 30.9,0.598,55.8],
+  'Kicker L7S 15':     [15,0.16,22.3,1000, 25.2,0.526,139.7]},
+'JL Audio':{
+  'JL 10W0v3':         [10,0.04,11,   300, 32.1,0.604,31.0],
+  'JL 12W0v3':         [12,0.06,11.4, 300, 28.4,0.67, 71.6],
+  'JL 10W3v3':         [10,0.05,14,   300, 31.5,0.485,32.2],
+  'JL 12W3v3':         [12,0.07,13,   500, 26.7,0.444,80.5],
+  'JL 10W6v3':         [10,0.08,19,   600, 30.1,0.513,23.3],
+  'JL 12W6v3':         [12,0.11,19,   600, 26.9,0.463,54.4],
+  'JL 10W7AE':         [10,0.10,23,   750, 30.6,0.537,36.1],
+  'JL 12W7AE':         [12,0.13,29,  1000, 27.2,0.482,66.0]},
+'Sony':{
+  'Sony XS-GSW121D':   [12,0.07, 9,   520, 32.0,0.64, 51.0]},
+'DC Audio':{
+  'DC Level 2 10':     [10,0.08,22,   600, 35.6,0.555,13.9],
+  'DC Level 2 12':     [12,0.10,22,   600, 33.0,0.594,30.6],
+  'DC Level 3 10':     [10,0.10,23,  1000, 38.5,0.528,13.2],
+  'DC Level 3 12':     [12,0.12,23,  1000, 35.4,0.574,29.0],
+  'DC Level 3 15':     [15,0.16,23,  1000, 30.9,0.65, 84.9],
+  'DC Level 4 12':     [12,0.18,23.5,1400, 37.9,0.489,27.4],
+  'DC Level 4 15':     [15,0.22,23.5,1400, 30.6,0.60, 80.2],
+  'DC Level 4 18':     [18,0.28,23.5,1400, 26.4,0.701,175.3]},
+'Down4Sound':{
+  'D4S DBZ 12':        [12,0.15,28,  1300, 39.7,0.454,18.4],
+  'D4S DVX 12':        [12,0.15,33,  1700, 39.0,0.503,138.5]},
+'Deaf Bonce':{
+  'DB Machete M12 v2': [12,0.07, 9,   300, 40.0,0.49, 39.8],
+  'DB Machete MF-12S': [12,0.10,14,   800, 35.0,0.49, 36.5],
+  'DB Apocalypse SA272':[12,0.14,18, 1500, 31.1,0.36, 30.7],
+  'DB Apocalypse SA275':[15,0.18,18, 1500, 31.3,0.46, 64.0]},
+'MTX Audio':{
+  'MTX Thunder T9510-44':[10,0.03,25.7, 750,41.1,0.831,13.1],
+  'MTX Thunder T9512-44':[12,0.05,25.7,1000,36.4,0.558,25.6],
+  'MTX Thunder T9515-44':[15,0.08,25.7,1000,31.9,0.655,70.0]},
+'American Bass':{
+  'AB Elite 1244':     [12,0.10,14,  1200, 33.1,0.517,34.0],
+  'AB XFL-1044':       [10,0.09,17.5,1500, 38.6,0.424, 9.7],
+  'AB XFL-1244':       [12,0.13,19,  1500, 33.6,0.437,31.9],
+  'AB XFL-1544':       [15,0.15,19,  1500, 31.5,0.48, 72.6]},
+'CT Sounds':{
+  'CT Bio-12':         [12,0.01, 7.5, 400, 33.1,0.644,51.7],
+  'CT Tropo-10':       [10,0.01,11,   650, 41.8,0.612,15.4],
+  'CT Tropo-12':       [12,0.02,13,   650, 33.0,0.501,32.5],
+  'CT Tropo-XL-12':    [12,0.03,14,  1000, 34.6,0.566,26.7],
+  'CT Strato-12':      [12,0.03,15,  1250, 31.1,0.549,22.1],
+  'CT Strato-15':      [15,0.04,15,  1250, 28.2,0.58, 62.9],
+  'CT Meso-12':        [12,0.03,20,  1500, 37.8,0.397,23.4],
+  'CT Meso-15':        [15,0.05,18,  1500, 32.9,0.42, 52.4]},
+'Alpine':{
+  'Alpine Type-R R2-W10D4':[10,0.06,20,750, 32.0,0.48, 18.2],
+  'Alpine Type-R R2-W12D4':[12,0.09,20,750, 30.0,0.51, 32.8]},
+'Pioneer':{
+  'Pioneer TS-W3003D4':[12,0.08,13.8, 600, 35.0,0.59, 34.6]},
+'Memphis Audio':{
+  'Memphis PRX1244':   [12,0.06,14,   300, 36.5,0.807,35.0]}
+};
+
+function builtInLookup(name){
+  for(const brand in BUILT_IN_DRIVERS){
+    if(BUILT_IN_DRIVERS[brand][name]){
+      const a=BUILT_IN_DRIVERS[brand][name];
+      return {SD:a[0],SDisp:a[1],Xmax:a[2],RMS:a[3],Fs:a[4],Qts:a[5],Vas:a[6],Pe:a[3]};
+    }
+  }
+  return null;
+}
+
+function getDrivers(){
+  try{ return JSON.parse(localStorage.getItem(DRV_KEY))||{}; }catch(e){ return {}; }
+}
+function refreshDriverList(selName){
+  const sel=document.getElementById('drvSel');
+  if(!sel) return;
+  sel.innerHTML='<option value="">— Manual Entry —</option>';
+  const mine=getDrivers();
+  const myNames=Object.keys(mine).sort((a,b)=>a.localeCompare(b));
+  if(myNames.length){
+    const g=document.createElement('optgroup'); g.label='★ My Drivers';
+    myNames.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; g.appendChild(o); });
+    sel.appendChild(g);
+  }
+  Object.keys(BUILT_IN_DRIVERS).forEach(brand=>{
+    const g=document.createElement('optgroup'); g.label=brand;
+    Object.keys(BUILT_IN_DRIVERS[brand]).forEach(n=>{
+      if(mine[n]) return; // user-saved copy shadows the built-in
+      const o=document.createElement('option'); o.value=n; o.textContent=n; g.appendChild(o);
+    });
+    if(g.children.length) sel.appendChild(g);
+  });
+  sel.value=selName||'';
+}
+function drvFlash(msg,bad){
+  const el=document.getElementById('drvStatus');
+  if(!el) return;
+  el.textContent=msg;
+  el.style.color=bad?'#f87171':'var(--good)';
+  el.style.display='';
+  clearTimeout(drvFlash.t);
+  drvFlash.t=setTimeout(()=>{ el.style.display='none'; },2500);
+}
+function saveDriver(){
+  const nameEl=document.getElementById('drvName');
+  const selEl=document.getElementById('drvSel');
+  const name=(nameEl.value||'').trim()||selEl.value;
+  if(!name){ drvFlash('Enter a name for this driver first',true); nameEl.focus(); return; }
+  const drivers=getDrivers();
+  const d={}; DRV_FIELDS.forEach(k=>d[k]=S[k]);
+  drivers[name]=d;
+  try{ localStorage.setItem(DRV_KEY,JSON.stringify(drivers)); }
+  catch(e){ drvFlash('Could not save (storage unavailable)',true); return; }
+  refreshDriverList(name);
+  nameEl.value='';
+  drvFlash('✓ Saved "'+name+'"');
+}
+function loadDriver(name){
+  if(!name){ document.getElementById('drvName').value=''; return; }
+  const d=getDrivers()[name]||builtInLookup(name);
+  if(!d){ refreshDriverList(); return; }
+  DRV_FIELDS.forEach(k=>{ if(typeof d[k]==='number') S[k]=d[k]; });
+  // Sync slider positions and T/S input boxes to the loaded values
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v; };
+  set('rSD',S.SD); set('rSDisp',S.SDisp); set('rXmax',S.Xmax); set('rRMS',S.RMS);
+  set('inFs',S.Fs||''); set('inQts',S.Qts||''); set('inVas',S.Vas||''); set('inPe',S.Pe||'');
+  document.getElementById('drvSel').value=name;
+  document.getElementById('drvName').value=name;
+  go();
+}
+function deleteDriver(){
+  const sel=document.getElementById('drvSel');
+  const name=sel.value;
+  if(!name){ drvFlash('Select a saved driver to delete',true); return; }
+  const drivers=getDrivers();
+  if(!drivers[name]){ drvFlash('Built-in drivers can\'t be deleted',true); return; }
+  delete drivers[name];
+  try{ localStorage.setItem(DRV_KEY,JSON.stringify(drivers)); }catch(e){}
+  refreshDriverList();
+  document.getElementById('drvName').value='';
+  drvFlash('Deleted "'+name+'"');
+}
+function drvManual(){
+  // Any hand edit means the values no longer match a saved driver
+  const sel=document.getElementById('drvSel');
+  if(sel) sel.value='';
+}
+window.saveDriver=saveDriver; window.loadDriver=loadDriver;
+window.deleteDriver=deleteDriver; window.drvManual=drvManual;
+
+// ── DONATION BUTTONS — built from the DONATE config at the top of this script ──
+function buildDonate(){
+  const wrap=document.getElementById('donateBtns'), card=document.getElementById('donateCard');
+  if(!wrap||!card) return;
+  const clean=v=>String(v||'').trim().replace(/^[@$]+/,'');
+  const defs=[
+    {k:'cashapp',cls:'d-cashapp',name:'Cash App',show:h=>'$'+h, url:h=>'https://cash.app/$'+encodeURIComponent(h)},
+    {k:'venmo',  cls:'d-venmo',  name:'Venmo',   show:h=>'@'+h, url:h=>'https://www.venmo.com/u/'+encodeURIComponent(h)},
+    {k:'paypal', cls:'d-paypal', name:'PayPal',  show:h=>h,     url:h=>'https://paypal.me/'+encodeURIComponent(h)}
+  ];
+  wrap.innerHTML=''; let n=0;
+  defs.forEach(d=>{
+    const h=clean(typeof DONATE!=='undefined'?DONATE[d.k]:''); if(!h) return;
+    const a=document.createElement('a');
+    a.className='dbtn '+d.cls;
+    a.href=d.url(h); a.target='_blank'; a.rel='noopener noreferrer';
+    const nm=document.createElement('span'); nm.className='dmark'; nm.textContent=d.name;
+    const hd=document.createElement('span');
+    hd.style.cssText='opacity:.85;font-weight:600;font-size:11px';
+    hd.textContent=d.show(h);
+    a.appendChild(nm); a.appendChild(hd);
+    wrap.appendChild(a); n++;
+  });
+  card.style.display=n?'':'none';
+}
+window.buildDonate=buildDonate;
+
+// ── LEGAL NOTICE ──────────────────────────────────────────────────────────────
+function copyrightSpan(){
+  const y=new Date().getFullYear();
+  return (y>LEGAL.year) ? LEGAL.year+'–'+y : String(LEGAL.year);
+}
+function buildLegal(){
+  const span=copyrightSpan();
+  const short='© '+span+' '+LEGAL.owner;
+  const full =short+'. All rights reserved.';
+  const set=(id,txt)=>{const e=document.getElementById(id); if(e) e.textContent=txt;};
+  set('copyLine', short);
+  set('legalCopy', full);
+  set('printMark','Designed with '+LEGAL.owner+' Enclosure Creator · '+full);
+  set('legalContact','For licensing, permissions or to report unauthorized use, contact '
+    +LEGAL.owner+(LEGAL.contact?' at '+LEGAL.contact:'')+'.');
+  // Notice for anyone inspecting the source
+  try{
+    console.log('%c'+LEGAL.owner+' — Enclosure Creator',
+      'color:#f97316;font-size:15px;font-weight:700');
+    console.log('%c'+full+'\nThis software and its source code are proprietary. Copying, '
+      +'redistribution, rebranding or derivative works are not permitted without written '
+      +'permission. Enclosures you design with it are yours to build and sell.',
+      'color:#8890a0;font-size:11px');
+  }catch(e){}
+}
+function openLegal(){ const o=document.getElementById('legalOverlay'); if(o) o.classList.add('on'); }
+function closeLegal(){ const o=document.getElementById('legalOverlay'); if(o) o.classList.remove('on'); }
+window.openLegal=openLegal; window.closeLegal=closeLegal;
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeLegal(); });
+
+// ── BOOT — wait for paint, then size & render ─────────────────────────────────
+window.addEventListener('load',()=>{
+  resizeCam();
+  resetCam();
+  refreshDriverList();
+  buildDonate();
+  buildLegal();
+  setEncl(S.encl);       // populates the Type tab and applies port availability
+  go();
+});
+</script>
+</body>
+</html>
